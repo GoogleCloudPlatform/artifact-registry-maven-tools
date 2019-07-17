@@ -1,11 +1,6 @@
-# Build Artifacts tools for Maven
-
-This repository contains tools to simplify the process of working with Maven repositories using
-Cloud Build Artifacts.
-
 # Cloud Build Artifacts Wagon
 
-The Cloud Build Artifacts is an implementation of the
+The Cloud Build Artifacts Wagon is an implementation of the
 [Maven Wagon API](https://maven.apache.org/wagon/) which allows you to configure Maven to interact
 with Maven repositories stored in Cloud Build Artifacts.
 
@@ -25,7 +20,7 @@ To enable the wagon, add the following configuration to the Maven pom.xml in you
     </extensions>
 ```
 
-You can then configure repositories using the resource name.
+You can then configure repositories using the repository's resource name.
 
 ```xml
   <repositories>
