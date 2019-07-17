@@ -20,13 +20,13 @@ To enable the wagon, add the following configuration to the Maven pom.xml in you
     </extensions>
 ```
 
-You can then configure repositories using the repository's resource name.
+You can then configure repositories by using the "buildartifacts://" prefix:
 
 ```xml
   <repositories>
     <repository>
       <id>my-repository</id>
-      <url>buildartifacts://project/PROJECT_ID/repositories/REPOSITORY_ID</url>
+      <url>buildartifacts://maven.pkg.dev/PROJECT_ID/REPOSITORY_ID</url>
       <releases>
         <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>

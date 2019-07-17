@@ -52,12 +52,11 @@ public final class BuildArtifactsWagon extends AbstractWagon {
   private GoogleRepository googleRepository;
   private HttpRequestFactory requestFactory;
   private boolean hasCredentials;
-  private static final String HOST = "maven.pkg.dev";
 
   private InputStream getInputStream(Resource resource)
       throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
     try {
-      GenericUrl url = googleRepository.constructURL(HOST, resource.getName());
+      GenericUrl url = googleRepository.constructURL(resource.getName());
       HttpRequest request = requestFactory.buildGetRequest(url);
       HttpResponse response = request.execute();
       return response.getContent();
@@ -81,7 +80,7 @@ public final class BuildArtifactsWagon extends AbstractWagon {
     } catch (IOException e) {
       requestFactory = httpTransport.createRequestFactory();
     }
-    googleRepository = GoogleRepository.parse(repository);
+    googleRepository = new GoogleRepository(repository);
   }
 
   @Override
@@ -167,7 +166,7 @@ public final class BuildArtifactsWagon extends AbstractWagon {
     this.firePutInitiated(resource, source);
     resource.setContentLength(source.length());
     resource.setLastModified(source.lastModified());
-    GenericUrl url = googleRepository.constructURL(HOST, resource.getName());
+    GenericUrl url = googleRepository.constructURL(resource.getName());
     this.firePutStarted(resource, source);
     handlePutRequest(source, resource, url);
     this.firePutCompleted(resource, source);
@@ -200,39 +199,19 @@ public final class BuildArtifactsWagon extends AbstractWagon {
 
   private static class GoogleRepository {
 
-    private final String projectId;
-    private final String repositoryId;
+    private final Repository repository;
 
-    GoogleRepository(String projectId, String repositoryId) {
-      this.projectId = projectId;
-      this.repositoryId = repositoryId;
+    GoogleRepository(Repository repository) {
+      this.repository = repository;
     }
 
-    static GoogleRepository parse(Repository repo) throws ConnectionException {
-      ConnectionException invalidFormatException = new ConnectionException(
-          "The repository URL must be formatted as buildartifacts://projects/<project_id>/repositories/<repository_id>");
-      if (!repo.getHost().equals("projects")) {
-        throw invalidFormatException;
-      }
-      String[] parts = repo.getBasedir().split("/");
-      if (parts.length != 4) {
-        throw invalidFormatException;
-      }
-      if (!parts[2].equals("repositories") || !parts[0].isEmpty()) {
-        throw invalidFormatException;
-      }
-      return new GoogleRepository(parts[1], parts[3]);
-    }
-
-    GenericUrl constructURL(String host, String artifactPath) {
+    GenericUrl constructURL(String artifactPath) {
       GenericUrl url = new GenericUrl();
       url.setScheme("https");
-      url.setHost(host + "/");
-      List<String> segments = new ArrayList<>();
-      segments.add(projectId);
-      segments.add(repositoryId);
-      segments.addAll(Arrays.asList(artifactPath.split("/")));
-      url.setPathParts(segments);
+      url.setHost(repository.getHost());
+      url.appendRawPath(repository.getBasedir());
+      url.appendRawPath("/");
+      url.appendRawPath(artifactPath);
       return url;
     }
   }
