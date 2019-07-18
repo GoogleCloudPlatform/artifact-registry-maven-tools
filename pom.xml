@@ -6,7 +6,7 @@
 
   <groupId>com.google.cloud.buildartifacts</groupId>
   <artifactId>buildartifacts-maven-wagon</artifactId>
-  <version>0.9.1-SNAPSHOT</version>
+  <version>0.9.2-SNAPSHOT</version>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -47,6 +47,12 @@
       <artifactId>google-auth-library-oauth2-http</artifactId>
       <version>0.16.2</version>
     </dependency>
+    <dependency>
+      <groupId>org.apache.maven.wagon</groupId>
+      <artifactId>wagon-provider-test</artifactId>
+      <version>3.3.3</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
@@ -63,3 +69,4 @@
     </plugins>
   </build>
 </project>
+

@@ -27,13 +27,11 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.auth.http.HttpTransportFactory;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -52,6 +50,9 @@ public final class BuildArtifactsWagon extends AbstractWagon {
   private GoogleRepository googleRepository;
   private HttpRequestFactory requestFactory;
   private boolean hasCredentials;
+  private HttpTransportFactory authHttpTransportFactory = NetHttpTransport::new;
+  private HttpTransportFactory httpTransportFactory = NetHttpTransport::new;
+  private GoogleCredentials credentials;
 
   private InputStream getInputStream(Resource resource)
       throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
@@ -71,9 +72,12 @@ public final class BuildArtifactsWagon extends AbstractWagon {
   @Override
   protected void openConnectionInternal() throws ConnectionException, AuthenticationException {
     HttpRequestInitializer requestInitializer;
-    HttpTransport httpTransport = new NetHttpTransport();
+    HttpTransport httpTransport = httpTransportFactory.create();
     try {
-      GoogleCredentials credentials = GoogleCredentials.getApplicationDefault();
+      if (credentials == null) {
+        credentials = GoogleCredentials.getApplicationDefault(
+            authHttpTransportFactory);
+      }
       requestInitializer = new HttpCredentialsAdapter(credentials);
       requestFactory = httpTransport.createRequestFactory(requestInitializer);
       hasCredentials = true;
@@ -109,6 +113,18 @@ public final class BuildArtifactsWagon extends AbstractWagon {
       throw e;
     }
     return true;
+  }
+
+  public void setAuthHttpTransportFactory(HttpTransportFactory factory) {
+    this.authHttpTransportFactory = factory;
+  }
+
+  public void setHttpTransportFactory(HttpTransportFactory httpTransportFactory) {
+    this.httpTransportFactory = httpTransportFactory;
+  }
+
+  public void setCredentials(GoogleCredentials credentials) {
+    this.credentials = credentials;
   }
 
   private void handlePutRequest(File source, Resource resource, GenericUrl url)
