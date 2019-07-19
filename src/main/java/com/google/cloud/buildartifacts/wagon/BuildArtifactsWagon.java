@@ -27,11 +27,14 @@ import com.google.api.client.http.HttpResponseException;
 import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.auth.Credentials;
 import com.google.auth.http.HttpTransportFactory;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -41,7 +44,6 @@ import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.Repository;
 import com.google.auth.http.HttpCredentialsAdapter;
-import com.google.auth.oauth2.GoogleCredentials;
 import org.apache.maven.wagon.resource.Resource;
 
 
@@ -50,9 +52,9 @@ public final class BuildArtifactsWagon extends AbstractWagon {
   private GoogleRepository googleRepository;
   private HttpRequestFactory requestFactory;
   private boolean hasCredentials;
-  private HttpTransportFactory authHttpTransportFactory = NetHttpTransport::new;
   private HttpTransportFactory httpTransportFactory = NetHttpTransport::new;
-  private GoogleCredentials credentials;
+  private CredentialProvider credentialProvider = new DefaultCredentialProvider();
+  private Credentials credentials;
 
   private InputStream getInputStream(Resource resource)
       throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
@@ -74,10 +76,7 @@ public final class BuildArtifactsWagon extends AbstractWagon {
     HttpRequestInitializer requestInitializer;
     HttpTransport httpTransport = httpTransportFactory.create();
     try {
-      if (credentials == null) {
-        credentials = GoogleCredentials.getApplicationDefault(
-            authHttpTransportFactory);
-      }
+      credentials = credentialProvider.getCredential();
       requestInitializer = new HttpCredentialsAdapter(credentials);
       requestFactory = httpTransport.createRequestFactory(requestInitializer);
       hasCredentials = true;
@@ -115,16 +114,12 @@ public final class BuildArtifactsWagon extends AbstractWagon {
     return true;
   }
 
-  public void setAuthHttpTransportFactory(HttpTransportFactory factory) {
-    this.authHttpTransportFactory = factory;
-  }
-
   public void setHttpTransportFactory(HttpTransportFactory httpTransportFactory) {
     this.httpTransportFactory = httpTransportFactory;
   }
 
-  public void setCredentials(GoogleCredentials credentials) {
-    this.credentials = credentials;
+  public void setCredentialProvider(CredentialProvider provider) {
+    this.credentialProvider = provider;
   }
 
   private void handlePutRequest(File source, Resource resource, GenericUrl url)

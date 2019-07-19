@@ -7,6 +7,7 @@ import com.google.api.client.http.LowLevelHttpResponse;
 import com.google.api.client.testing.http.MockHttpTransport;
 import com.google.api.client.testing.http.MockLowLevelHttpRequest;
 import com.google.api.client.testing.http.MockLowLevelHttpResponse;
+import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.common.io.Files;
@@ -37,11 +38,9 @@ public class BuildArtifactsWagonTest {
 
   @Test
   public void testAnonymousGet() throws Exception {
-    MockHttpTransport authTransport = failingTransport(
-        new IOException("failed to get access token"));
     MockHttpTransport transport = transportWithResponse("test content");
     BuildArtifactsWagon wagon = new BuildArtifactsWagon();
-    wagon.setAuthHttpTransportFactory(() -> authTransport);
+    wagon.setCredentialProvider(new FailingCredentialProvider(new IOException("failed to get access token")));
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
     File f = FileTestUtils.createUniqueFile("my/artifact/dir", "test");
@@ -51,12 +50,10 @@ public class BuildArtifactsWagonTest {
 
   @Test
   public void testGetPermissionDenied() throws Exception {
-    MockHttpTransport authTransport = failingTransport(
-        new IOException("failed to get access token"));
     MockHttpTransport transport = failingTransportWithStatus(
         HttpStatusCodes.STATUS_CODE_UNAUTHORIZED);
     BuildArtifactsWagon wagon = new BuildArtifactsWagon();
-    wagon.setAuthHttpTransportFactory(() -> authTransport);
+    wagon.setCredentialProvider(new FailingCredentialProvider(new IOException("failed to get access token")));
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
     File f = FileTestUtils.createUniqueFile("my/artifact/dir", "test");
@@ -70,11 +67,9 @@ public class BuildArtifactsWagonTest {
 
   @Test
   public void testNotFoundReturnsMessage() throws Exception {
-    MockHttpTransport authTransport = failingTransport(
-        new IOException("failed to get access token"));
     MockHttpTransport transport = failingTransportWithStatus(HttpStatusCodes.STATUS_CODE_NOT_FOUND);
     BuildArtifactsWagon wagon = new BuildArtifactsWagon();
-    wagon.setAuthHttpTransportFactory(() -> authTransport);
+    wagon.setCredentialProvider(new FailingCredentialProvider(new IOException("failed to get access token")));
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
     File f = FileTestUtils.createUniqueFile("my/artifact/dir", "test");
@@ -89,7 +84,7 @@ public class BuildArtifactsWagonTest {
         .setLowLevelHttpResponse(new MockLowLevelHttpResponse().setContent("test content"))
         .build();
     BuildArtifactsWagon wagon = new BuildArtifactsWagon();
-    wagon.setCredentials(GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
+    wagon.setCredentialProvider(() -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
         Instant.now().plusSeconds(1000)))));
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
@@ -107,7 +102,7 @@ public class BuildArtifactsWagonTest {
     MockHttpTransport transport = new MockHttpTransport.Builder()
         .setLowLevelHttpResponse(new MockLowLevelHttpResponse()).build();
     BuildArtifactsWagon wagon = new BuildArtifactsWagon();
-    wagon.setCredentials(GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
+    wagon.setCredentialProvider(() -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
         Instant.now().plusSeconds(1000)))));
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
@@ -123,12 +118,10 @@ public class BuildArtifactsWagonTest {
 
   @Test
   public void testPutPermissionDenied() throws Exception {
-    MockHttpTransport authTransport = failingTransport(
-        new IOException("failed to get access token"));
     MockHttpTransport transport = failingTransportWithStatus(
         HttpStatusCodes.STATUS_CODE_UNAUTHORIZED);
     BuildArtifactsWagon wagon = new BuildArtifactsWagon();
-    wagon.setAuthHttpTransportFactory(() -> authTransport);
+    wagon.setCredentialProvider(new FailingCredentialProvider(new IOException("failed to get access token")));
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
     File f = FileTestUtils.createUniqueFile("my/artifact/dir", "test");
@@ -165,4 +158,18 @@ public class BuildArtifactsWagonTest {
     return failingTransport(
         new HttpResponseException.Builder(statusCode, "", new HttpHeaders()).build());
   }
+
+  private static class FailingCredentialProvider implements CredentialProvider {
+    private final IOException exception;
+
+    public FailingCredentialProvider(IOException e) {
+      this.exception = e;
+    }
+
+    @Override
+    public Credentials getCredential() throws IOException {
+      throw exception;
+    }
+  }
+
 }
