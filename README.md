@@ -4,8 +4,11 @@ The Cloud Build Artifacts Wagon is an implementation of the
 [Maven Wagon API](https://maven.apache.org/wagon/) which allows you to configure Maven to interact
 with Maven repositories stored in Cloud Build Artifacts.
 
-The wagon will authenticate to Cloud Build Artifacts using
-[Google Application Default Credentials](https://developers.google.com/accounts/docs/application-default-credentials).
+The wagon will authenticate to Cloud Build Artifacts using credentials from the environment. It will
+search for credentials in the following order:
+1. From the `gcloud` SDK. (i.e., the access token printed via `gcloud config config-helper --format='value(credential.access_token)'`)
+    * Hint: You can see which account is active with the command `gcloud config config-helper --format='value(configuration.properties.core.account)'`
+1. [Google Application Default Credentials](https://developers.google.com/accounts/docs/application-default-credentials).
 
 
 To enable the wagon, add the following configuration to the Maven pom.xml in your project root:
