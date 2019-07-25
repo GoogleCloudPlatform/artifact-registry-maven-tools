@@ -17,8 +17,8 @@ To enable the wagon, add the following configuration to the Maven pom.xml in you
     <extensions>
         <extension>
             <groupId>com.google.cloud.buildartifacts</groupId>
-            <artifactId>buildartifacts-wagon</artifactId>
-            <version>1.0-0</version>
+            <artifactId>buildartifacts-maven-wagon</artifactId>
+            <version>1.0.0</version>
         </extension>
     </extensions>
 ```
