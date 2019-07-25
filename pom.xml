@@ -18,6 +18,8 @@
     </developer>
   </developers>
 
+  <url>https://github.com/GoogleCloudPlatform/build-artifacts-maven-tools</url>
+
   <scm>
     <connection>
       scm:git:https://github.com/GoogleCloudPlatform/build-artifacts-maven-tools.git
