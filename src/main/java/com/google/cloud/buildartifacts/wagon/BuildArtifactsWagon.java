@@ -187,15 +187,15 @@ public final class BuildArtifactsWagon extends AbstractWagon {
       throws AuthorizationException, ResourceDoesNotExistException {
     if (e.getStatusCode() == HttpStatusCodes.STATUS_CODE_FORBIDDEN
         || e.getStatusCode() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED) {
-      StringBuilder builder = new StringBuilder();
-      builder.append("Permission denied on remote repository (or it may not exist). ");
+      String errorMessage = "Permission denied on remote repository (or it may not exist). ";
       if (!hasCredentials) {
-        builder
-            .append("The request had no credentials because the application default credentials ");
-        builder.append(
-            "are not available. See https://developers.google.com/accounts/docs/application-default-credentials for more information.");
+        errorMessage += "The request had no credentials because none were available "
+            + "from the environment. Ensure that either 1) You are logged into gcloud or 2) "
+            + "Application default credentials are setup (see "
+            + "https://developers.google.com/accounts/docs/application-default-credentials for "
+            + "more information).";
       }
-      throw new AuthorizationException(builder.toString(), e);
+      throw new AuthorizationException(errorMessage, e);
     } else if (e.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
       throw new ResourceDoesNotExistException("The remote resource does not exist.", e);
     }

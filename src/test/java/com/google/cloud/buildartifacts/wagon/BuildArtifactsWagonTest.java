@@ -61,7 +61,7 @@ public class BuildArtifactsWagonTest {
     expectedException.expectMessage(CoreMatchers
         .containsString("Permission denied on remote repository (or it may not exist)"));
     expectedException.expectMessage(
-        CoreMatchers.containsString("application default credentials are not available"));
+        CoreMatchers.containsString("The request had no credentials"));
     wagon.get("my/resource", f);
   }
 
@@ -130,7 +130,7 @@ public class BuildArtifactsWagonTest {
     expectedException.expectMessage(CoreMatchers
         .containsString("Permission denied on remote repository (or it may not exist)"));
     expectedException.expectMessage(
-        CoreMatchers.containsString("application default credentials are not available"));
+        CoreMatchers.containsString("The request had no credentials"));
     wagon.put(f, "my/resource");
   }
 
