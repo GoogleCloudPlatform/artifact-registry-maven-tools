@@ -14,23 +14,14 @@
  * limitations under the License.
  */
 
-package com.google.cloud.buildartifacts.wagon;
+package com.google.cloud.buildartifacts.auth;
 
 import com.google.auth.Credentials;
-import com.google.auth.oauth2.GoogleCredentials;
+
 import java.io.IOException;
 
-// DefaultCredentialProvider fetches credentials from gcloud and falls back to Application Default
-// Credentials if that fails.
-public class DefaultCredentialProvider implements CredentialProvider {
+@FunctionalInterface
+public interface CredentialProvider {
 
-  @Override
-  public Credentials getCredential() throws IOException {
-    Credentials credentials;
-    credentials = GcloudCredentials.tryCreateGcloudCredentials();
-    if (credentials != null) {
-      return credentials;
-    }
-    return GoogleCredentials.getApplicationDefault();
-  }
+  Credentials getCredential() throws IOException;
 }

@@ -10,6 +10,7 @@ import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.buildartifacts.auth.CredentialProvider;
 import com.google.common.io.Files;
 import java.io.IOException;
 import java.nio.charset.Charset;

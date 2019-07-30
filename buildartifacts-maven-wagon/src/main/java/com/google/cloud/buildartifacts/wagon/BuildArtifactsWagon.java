@@ -29,6 +29,8 @@ import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
 import com.google.auth.http.HttpTransportFactory;
+import com.google.cloud.buildartifacts.auth.CredentialProvider;
+import com.google.cloud.buildartifacts.auth.DefaultCredentialProvider;
 
 import java.io.File;
 import java.io.IOException;

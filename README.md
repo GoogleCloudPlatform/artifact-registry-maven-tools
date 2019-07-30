@@ -1,4 +1,9 @@
-# Cloud Build Artifacts Wagon
+# Cloud Build Artifacts Maven Tools
+
+This repository contains tools to help with interacting with Maven repositories hosted on Cloud
+Build Artifacts.
+
+## Maven Wagon
 
 The Cloud Build Artifacts Wagon is an implementation of the
 [Maven Wagon API](https://maven.apache.org/wagon/) which allows you to configure Maven to interact
