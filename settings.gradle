@@ -1,0 +1,4 @@
+rootProject.name = 'buildartifacts-maven-tools'
+include 'buildartifacts-maven-wagon'
+include 'buildartifacts-auth-common'
+
