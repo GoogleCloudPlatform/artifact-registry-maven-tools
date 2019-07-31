@@ -93,8 +93,8 @@ publishing {
             }
         }
         authCommon(MavenPublication) {
-            artifactId = "buildartifacts-maven-auth-common"
-            def project = project(":buildartifacts-maven-wagon")
+            artifactId = "buildartifacts-auth-common"
+            def project = project(":buildartifacts-auth-common")
             from project.components.java
             artifact(project.sourcesJar) {
                 classifier = 'sources'
@@ -124,6 +124,12 @@ publishing {
 }
 
 project(":buildartifacts-maven-wagon") {
+    dependencies {
+        compile project(":buildartifacts-auth-common")
+    }
+}
+
+project(":buildartifacts-gradle-plugin") {
     dependencies {
         compile project(":buildartifacts-auth-common")
     }
