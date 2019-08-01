@@ -23,6 +23,7 @@ import com.google.cloud.buildartifacts.auth.DefaultCredentialProvider;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.artifacts.repositories.PasswordCredentials;
@@ -32,6 +33,7 @@ import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.ProjectConfigurationException;
+import org.gradle.api.UncheckedIOException;
 
 public class BuildArtifactsGradlePlugin implements Plugin<Project> {
 
@@ -79,29 +81,32 @@ public class BuildArtifactsGradlePlugin implements Plugin<Project> {
   }
 
   public void configureBuildArtifactsRepositories(ArtifactRepository repo)
-      throws ProjectConfigurationException
+      throws ProjectConfigurationException, UncheckedIOException
       {
-        try {
-          GoogleCredentials credentials = (GoogleCredentials)credentialProvider.getCredential();
-          AccessToken accessToken = credentials.getAccessToken();
-          String token = accessToken.getTokenValue();
-
-          if (!(repo instanceof DefaultMavenArtifactRepository)) {
-            return;
-          }
-          final DefaultMavenArtifactRepository cbaRepo = (DefaultMavenArtifactRepository) repo;
-          final URI u = cbaRepo.getUrl(); 
-          if (u != null && u.getScheme() != null && u.getScheme().equals("buildartifacts")) {
+        if (!(repo instanceof DefaultMavenArtifactRepository)) {
+          return;
+        }
+        final DefaultMavenArtifactRepository cbaRepo = (DefaultMavenArtifactRepository) repo;
+        final URI u = cbaRepo.getUrl(); 
+        if (u != null && u.getScheme() != null && u.getScheme().equals("buildartifacts")) {
+          try {
             cbaRepo.setUrl(new URI("https", u.getHost(), u.getPath(), u.getFragment()));
-            BuildArtifactsPasswordCredentials crd = new BuildArtifactsPasswordCredentials("oauth2accesstoken", token);
-            cbaRepo.setConfiguredCredentials((Credentials)crd);
+          } catch (URISyntaxException e) {
+            throw new ProjectConfigurationException(String.format("Invalid repository URL %s", u.toString()), e);
           }
-        } catch (Exception e) {
-          System.out.println(e.toString());
-          Throwable cause = e.getCause();
-          throw (ProjectConfigurationException) cause;
+
+          if (cbaRepo.getConfiguredCredentials() == null) {
+            try {
+              GoogleCredentials credentials = (GoogleCredentials)credentialProvider.getCredential();
+              AccessToken accessToken = credentials.getAccessToken();
+              String token = accessToken.getTokenValue();
+              BuildArtifactsPasswordCredentials crd = new BuildArtifactsPasswordCredentials("oauth2accesstoken", token);
+              cbaRepo.setConfiguredCredentials((Credentials)crd);
+            } catch (IOException e) {
+              throw new UncheckedIOException("Failed to get access token from gcloud", e);
+            }
+          }
         }
       }
 }
-
 
