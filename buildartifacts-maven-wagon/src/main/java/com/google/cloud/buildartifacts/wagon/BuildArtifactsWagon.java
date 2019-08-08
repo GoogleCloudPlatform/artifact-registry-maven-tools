@@ -28,15 +28,14 @@ import com.google.api.client.http.HttpStatusCodes;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.auth.Credentials;
+import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.http.HttpTransportFactory;
 import com.google.cloud.buildartifacts.auth.CredentialProvider;
 import com.google.cloud.buildartifacts.auth.DefaultCredentialProvider;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-
 import org.apache.maven.wagon.AbstractWagon;
 import org.apache.maven.wagon.ConnectionException;
 import org.apache.maven.wagon.ResourceDoesNotExistException;
@@ -45,7 +44,6 @@ import org.apache.maven.wagon.authentication.AuthenticationException;
 import org.apache.maven.wagon.authorization.AuthorizationException;
 import org.apache.maven.wagon.events.TransferEvent;
 import org.apache.maven.wagon.repository.Repository;
-import com.google.auth.http.HttpCredentialsAdapter;
 import org.apache.maven.wagon.resource.Resource;
 
 
@@ -66,7 +64,8 @@ public final class BuildArtifactsWagon extends AbstractWagon {
       HttpResponse response = request.execute();
       return response.getContent();
     } catch (HttpResponseException e) {
-      rethrowKnownStatusCodes(e);
+      rethrowAuthorizationException(e);
+      rethrowNotFoundException(e);
       throw new TransferFailedException("Received an error from the remote server.", e);
     } catch (IOException e) {
       throw new TransferFailedException("Failed to send request to remote server.", e);
@@ -97,6 +96,24 @@ public final class BuildArtifactsWagon extends AbstractWagon {
   public void get(String resourceName, File destination)
       throws TransferFailedException, ResourceDoesNotExistException, AuthorizationException {
     getIfNewer(resourceName, destination, 0);
+  }
+
+  @Override
+  public boolean resourceExists(String resource)
+      throws TransferFailedException, AuthorizationException {
+    try {
+      GenericUrl url = googleRepository.constructURL(resource);
+      HttpRequest request = requestFactory.buildHeadRequest(url);
+      return request.execute().isSuccessStatusCode();
+    } catch (HttpResponseException e) {
+      if (e.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
+        return false;
+      }
+      rethrowAuthorizationException(e);
+      throw new TransferFailedException("Received an error from the remote server.", e);
+    } catch (IOException e) {
+      throw new TransferFailedException("Failed to send request to remote server.", e);
+    }
   }
 
   @Override
@@ -154,7 +171,8 @@ public final class BuildArtifactsWagon extends AbstractWagon {
       });
       request.execute();
     } catch (HttpResponseException e) {
-      rethrowKnownStatusCodes(e);
+      rethrowAuthorizationException(e);
+      rethrowNotFoundException(e);
       throw new TransferFailedException("Received an error from the remote server.", e);
     } catch (FileTransferException e) {
       Throwable cause = e.getCause();
@@ -185,8 +203,8 @@ public final class BuildArtifactsWagon extends AbstractWagon {
     this.firePutCompleted(resource, source);
   }
 
-  private void rethrowKnownStatusCodes(HttpResponseException e)
-      throws AuthorizationException, ResourceDoesNotExistException {
+  private void rethrowAuthorizationException(HttpResponseException e)
+      throws AuthorizationException {
     if (e.getStatusCode() == HttpStatusCodes.STATUS_CODE_FORBIDDEN
         || e.getStatusCode() == HttpStatusCodes.STATUS_CODE_UNAUTHORIZED) {
       String errorMessage = "Permission denied on remote repository (or it may not exist). ";
@@ -198,7 +216,12 @@ public final class BuildArtifactsWagon extends AbstractWagon {
             + "more information).";
       }
       throw new AuthorizationException(errorMessage, e);
-    } else if (e.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
+    }
+  }
+
+  private void rethrowNotFoundException(HttpResponseException e)
+      throws ResourceDoesNotExistException {
+    if (e.getStatusCode() == HttpStatusCodes.STATUS_CODE_NOT_FOUND) {
       throw new ResourceDoesNotExistException("The remote resource does not exist.", e);
     }
   }
