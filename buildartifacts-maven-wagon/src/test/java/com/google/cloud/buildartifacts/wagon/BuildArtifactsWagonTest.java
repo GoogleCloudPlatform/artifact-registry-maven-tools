@@ -135,6 +135,44 @@ public class BuildArtifactsWagonTest {
     wagon.put(f, "my/resource");
   }
 
+  @Test
+  public void testHeadPermissionDenied() throws Exception {
+    MockHttpTransport transport = failingTransportWithStatus(
+        HttpStatusCodes.STATUS_CODE_UNAUTHORIZED);
+    BuildArtifactsWagon wagon = new BuildArtifactsWagon();
+    wagon.setCredentialProvider(new FailingCredentialProvider(new IOException("failed to get access token")));
+    wagon.setHttpTransportFactory(() -> transport);
+    wagon.connect(new Repository("my-repo", REPO_URL));
+    expectedException.expect(AuthorizationException.class);
+    expectedException.expectMessage(CoreMatchers
+        .containsString("Permission denied on remote repository (or it may not exist)"));
+    wagon.resourceExists("my/resource");
+  }
+
+  @Test
+  public void testHeadExists() throws Exception {
+    MockHttpTransport transport = new MockHttpTransport.Builder()
+        .setLowLevelHttpResponse(new MockLowLevelHttpResponse().setStatusCode(HttpStatusCodes.STATUS_CODE_OK))
+        .build();
+    BuildArtifactsWagon wagon = new BuildArtifactsWagon();
+    wagon.setCredentialProvider(() -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
+        Instant.now().plusSeconds(1000)))));
+    wagon.setHttpTransportFactory(() -> transport);
+    wagon.connect(new Repository("my-repo", REPO_URL));
+    Assert.assertTrue(wagon.resourceExists("my/resource"));
+  }
+
+  @Test
+  public void testHeadNotFound() throws Exception {
+    MockHttpTransport transport = failingTransportWithStatus(HttpStatusCodes.STATUS_CODE_NOT_FOUND);
+    BuildArtifactsWagon wagon = new BuildArtifactsWagon();
+    wagon.setCredentialProvider(() -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
+        Instant.now().plusSeconds(1000)))));
+    wagon.setHttpTransportFactory(() -> transport);
+    wagon.connect(new Repository("my-repo", REPO_URL));
+    Assert.assertFalse(wagon.resourceExists("my/resource"));
+  }
+
   private void assertFileContains(File f, String wantContent) throws IOException {
     String content = Files.asCharSource(f, Charset.defaultCharset()).read();
     Assert.assertEquals(wantContent, content);
