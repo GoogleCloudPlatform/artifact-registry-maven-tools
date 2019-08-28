@@ -53,7 +53,7 @@ public class GcloudCredentials extends GoogleCredentials {
     try {
       return new GcloudCredentials(getGcloudAccessToken());
     } catch (IOException e) {
-      LOGGER.info("Failed to get credentials from gcloud: " + e.getMessage());
+      LOGGER.fine("Failed to get credentials from gcloud: " + e.getMessage());
       return null;
     }
   }
