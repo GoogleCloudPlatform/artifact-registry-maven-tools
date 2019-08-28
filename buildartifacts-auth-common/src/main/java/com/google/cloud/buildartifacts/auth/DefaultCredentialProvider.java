@@ -24,6 +24,9 @@ import java.io.IOException;
 // Credentials if that fails.
 public class DefaultCredentialProvider implements CredentialProvider {
 
+  private static String[] SCOPES = {"https://www.googleapis.com/auth/cloud-platform",
+      "https://www.googleapis.com/auth/cloud-platform.read-only"};
+
   @Override
   public Credentials getCredential() throws IOException {
     Credentials credentials;
@@ -31,6 +34,6 @@ public class DefaultCredentialProvider implements CredentialProvider {
     if (credentials != null) {
       return credentials;
     }
-    return GoogleCredentials.getApplicationDefault();
+    return GoogleCredentials.getApplicationDefault().createScoped(SCOPES);
   }
 }
