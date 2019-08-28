@@ -98,12 +98,13 @@ public class BuildArtifactsGradlePlugin implements Plugin<Project> {
           if (cbaRepo.getConfiguredCredentials() == null) {
             try {
               GoogleCredentials credentials = (GoogleCredentials)credentialProvider.getCredential();
+              credentials.refreshIfExpired();
               AccessToken accessToken = credentials.getAccessToken();
               String token = accessToken.getTokenValue();
               BuildArtifactsPasswordCredentials crd = new BuildArtifactsPasswordCredentials("oauth2accesstoken", token);
               cbaRepo.setConfiguredCredentials((Credentials)crd);
             } catch (IOException e) {
-              throw new UncheckedIOException("Failed to get access token from gcloud", e);
+              throw new UncheckedIOException("Failed to get access token from gcloud or Application Default Credentials", e);
             }
           }
         }
