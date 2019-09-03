@@ -26,7 +26,9 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
+import org.gradle.api.artifacts.repositories.AuthenticationContainer;
 import org.gradle.api.artifacts.repositories.PasswordCredentials;
+import org.gradle.api.Action;
 import org.gradle.api.credentials.Credentials;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
 import org.gradle.api.publish.PublishingExtension;
@@ -34,6 +36,7 @@ import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.ProjectConfigurationException;
 import org.gradle.api.UncheckedIOException;
+import org.gradle.internal.authentication.DefaultBasicAuthentication;
 
 public class BuildArtifactsGradlePlugin implements Plugin<Project> {
 
@@ -103,6 +106,12 @@ public class BuildArtifactsGradlePlugin implements Plugin<Project> {
               String token = accessToken.getTokenValue();
               BuildArtifactsPasswordCredentials crd = new BuildArtifactsPasswordCredentials("oauth2accesstoken", token);
               cbaRepo.setConfiguredCredentials((Credentials)crd);
+              cbaRepo.authentication(new Action<AuthenticationContainer>() {
+                @Override
+                public void execute(AuthenticationContainer authenticationContainer) {
+                  authenticationContainer.add(new DefaultBasicAuthentication("basic"));
+                }
+              });
             } catch (IOException e) {
               throw new UncheckedIOException("Failed to get access token from gcloud or Application Default Credentials", e);
             }
