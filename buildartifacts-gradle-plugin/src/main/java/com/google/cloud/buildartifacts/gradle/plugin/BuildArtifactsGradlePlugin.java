@@ -37,8 +37,12 @@ import org.gradle.api.Project;
 import org.gradle.api.ProjectConfigurationException;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.internal.authentication.DefaultBasicAuthentication;
+import org.gradle.api.invocation.Gradle;
+import org.gradle.plugin.management.PluginManagementSpec;
 
-public class BuildArtifactsGradlePlugin implements Plugin<Project> {
+
+public class BuildArtifactsGradlePlugin implements Plugin<Gradle> {
+//public class BuildArtifactsGradlePlugin implements Plugin<Project> {
 
   static class BuildArtifactsPasswordCredentials implements PasswordCredentials {
     private String username;
@@ -73,15 +77,25 @@ public class BuildArtifactsGradlePlugin implements Plugin<Project> {
   private CredentialProvider credentialProvider = new DefaultCredentialProvider();
 
   @Override
-  public void apply(Project project) {
-    project.afterEvaluate(p -> {
-      project.getRepositories().all(this::configureBuildArtifactsRepositories);
-      final PublishingExtension publishingExtension = project.getExtensions().findByType(PublishingExtension.class);
-      if (publishingExtension != null) {
-        publishingExtension.getRepositories().all(this::configureBuildArtifactsRepositories);
+  public void apply(Gradle gradle) {
+    gradle.settingsEvaluated​(s -> {
+      final PluginManagementSpec pluginManagement = s.getPluginManagement();
+      if (pluginManagement != null) {
+        pluginManagement.getRepositories().all(this::configureBuildArtifactsRepositories);
       }
     });
+
+    gradle.projectsEvaluated(g -> {
+      g.allprojects(p -> {
+        p.getRepositories().all(this::configureBuildArtifactsRepositories);
+        final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
+        if (publishingExtension != null) {
+          publishingExtension.getRepositories().all(this::configureBuildArtifactsRepositories);
+        }
+      });
+    });
   }
+
 
   public void configureBuildArtifactsRepositories(ArtifactRepository repo)
       throws ProjectConfigurationException, UncheckedIOException
