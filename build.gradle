@@ -135,6 +135,12 @@ project(":buildartifacts-gradle-plugin") {
     }
 }
 
+project(":buildartifacts-gradle-init-plugin") {
+    dependencies {
+        compile project(":buildartifacts-auth-common")
+    }
+}
+
 signing {
     sign publishing.publications.wagon
     sign publishing.publications.authCommon

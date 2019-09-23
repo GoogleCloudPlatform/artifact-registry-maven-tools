@@ -79,3 +79,17 @@ publishing {
 Where
 * **PROJECT_ID** is the ID of the project.
 * **REPOSITORY_ID** is the ID of the repository.
+
+### Alternatives
+
+If you need to use BuildArtifacts repositories inside your `init.gradle` or `settings.gradle`, please instead use `com.google.cloud.buildartifacts.gradle-init-plugin` by adding the following configuration to the `~/.gradle/init.gradle` file.
+
+```
+initscript {
+  dependencies {
+    classpath "com.google.cloud.buildartifacts:buildartifacts-gradle-init-plugin:1.1.4"            
+  }
+}
+apply plugin: com.google.cloud.buildartifacts.gradle.init.plugin.BuildArtifactsGradleInitPlugin
+
+```
