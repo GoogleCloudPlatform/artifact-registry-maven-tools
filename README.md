@@ -84,7 +84,7 @@ Where
 
 If you need to use BuildArtifacts repositories inside your `init.gradle` or `settings.gradle`, please instead use `com.google.cloud.buildartifacts.gradle-init-plugin` by adding the following configuration to the `~/.gradle/init.gradle` file.
 
-```
+```gradle
 initscript {
   dependencies {
     classpath "com.google.cloud.buildartifacts:buildartifacts-gradle-init-plugin:1.1.4"            
