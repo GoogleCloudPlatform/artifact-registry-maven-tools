@@ -79,37 +79,39 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
       applyProject((Project) o);
     } else if (o instanceof Gradle) {
       applyGradle((Gradle) o);
-    } else {
-      throw new IllegalArgumentException(o.getClass().getName());
     }
   }
 
-  public void applyProject(Project project) {
-    project.afterEvaluate(p -> {
-      project.getRepositories().all(this::configureBuildArtifactsRepositories);
-      final PublishingExtension publishingExtension = project.getExtensions().findByType(PublishingExtension.class);
-      if (publishingExtension != null) {
-        publishingExtension.getRepositories().all(this::configureBuildArtifactsRepositories);
-      }
-    });
+  public void modifyProject(Project p) {
+    p.getRepositories().all(this::configureBuildArtifactsRepositories);
+    final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
+    if (publishingExtension != null) {
+      publishingExtension.getRepositories().all(this::configureBuildArtifactsRepositories);
+    }
+  }
+
+  public void modifySettings(Settings s) {
+    final PluginManagementSpec pluginManagement = s.getPluginManagement();
+    if (pluginManagement != null) {
+      pluginManagement.getRepositories().all(this::configureBuildArtifactsRepositories);
+    }
   }
 
   public void applyGradle(Gradle gradle) {
     gradle.settingsEvaluated​(s -> {
-      final PluginManagementSpec pluginManagement = s.getPluginManagement();
-      if (pluginManagement != null) {
-        pluginManagement.getRepositories().all(this::configureBuildArtifactsRepositories);
-      }
+      modifySettings(s);
     });
 
     gradle.projectsEvaluated(g -> {
       g.allprojects(p -> {
-        p.getRepositories().all(this::configureBuildArtifactsRepositories);
-        final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
-        if (publishingExtension != null) {
-          publishingExtension.getRepositories().all(this::configureBuildArtifactsRepositories);
-        }
+       modifyProject(p);
       });
+    });
+  }
+
+  public void applyProject(Project project) {
+    project.afterEvaluate(p -> {
+      modifyProject(p);
     });
   }
 
