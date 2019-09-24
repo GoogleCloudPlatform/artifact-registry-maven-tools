@@ -86,10 +86,12 @@ If you need to use BuildArtifacts repositories inside your `init.gradle` or `set
 
 ```gradle
 initscript {
+  repositories {
+    gradlePluginPortal()
+  }
   dependencies {
-    classpath "com.google.cloud.buildartifacts:buildartifacts-gradle-init-plugin:1.1.4"            
+    classpath "gradle.plugin.com.google.cloud.buildartifacts:buildartifacts-gradle-init-plugin:1.1.4"
   }
 }
 apply plugin: com.google.cloud.buildartifacts.gradle.init.plugin.BuildArtifactsGradleInitPlugin
-
 ```
