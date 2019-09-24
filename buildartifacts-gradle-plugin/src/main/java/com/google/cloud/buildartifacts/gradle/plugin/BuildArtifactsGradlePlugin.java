@@ -31,6 +31,7 @@ import org.gradle.api.artifacts.repositories.PasswordCredentials;
 import org.gradle.api.Action;
 import org.gradle.api.credentials.Credentials;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
+import org.gradle.api.initialization.Settings;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.Plugin;
@@ -79,7 +80,34 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
       applyProject((Project) o);
     } else if (o instanceof Gradle) {
       applyGradle((Gradle) o);
+    } else if (o instanceof Settings) {
+      applySettings((Settings) o);
     }
+  }
+
+  // The plugin for Gradle will apply CBA repo settings inside settings.gradle and build.gradle.
+  public void applyGradle(Gradle gradle) {
+    gradle.settingsEvaluated​(s -> {
+      modifySettings(s);
+    });
+
+    gradle.projectsEvaluated(g -> {
+      g.allprojects(p -> {
+       modifyProject(p);
+      });
+    });
+  }
+
+  // The plugin for settings will apply CBA repo settings inside settings.gradle and build.gradle.
+  public void applySettings(Settings settings) {
+    applyGradle(settings.getGradle());
+  }
+
+  // The plugin for projects will only apply CBA repo settings inside build.gradle.
+  public void applyProject(Project project) {
+    project.afterEvaluate(p -> {
+      modifyProject(p);
+    });
   }
 
   public void modifyProject(Project p) {
@@ -95,24 +123,6 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
     if (pluginManagement != null) {
       pluginManagement.getRepositories().all(this::configureBuildArtifactsRepositories);
     }
-  }
-
-  public void applyGradle(Gradle gradle) {
-    gradle.settingsEvaluated​(s -> {
-      modifySettings(s);
-    });
-
-    gradle.projectsEvaluated(g -> {
-      g.allprojects(p -> {
-       modifyProject(p);
-      });
-    });
-  }
-
-  public void applyProject(Project project) {
-    project.afterEvaluate(p -> {
-      modifyProject(p);
-    });
   }
 
   public void configureBuildArtifactsRepositories(ArtifactRepository repo)
