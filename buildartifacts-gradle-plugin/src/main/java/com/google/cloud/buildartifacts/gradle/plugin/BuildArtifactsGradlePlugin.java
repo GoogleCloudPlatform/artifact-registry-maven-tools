@@ -31,14 +31,16 @@ import org.gradle.api.artifacts.repositories.PasswordCredentials;
 import org.gradle.api.Action;
 import org.gradle.api.credentials.Credentials;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
+import org.gradle.api.invocation.Gradle;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.ProjectConfigurationException;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.internal.authentication.DefaultBasicAuthentication;
+import org.gradle.plugin.management.PluginManagementSpec;
 
-public class BuildArtifactsGradlePlugin implements Plugin<Project> {
+public class BuildArtifactsGradlePlugin implements Plugin<Object> {
 
   static class BuildArtifactsPasswordCredentials implements PasswordCredentials {
     private String username;
@@ -72,14 +74,42 @@ public class BuildArtifactsGradlePlugin implements Plugin<Project> {
 
   private CredentialProvider credentialProvider = new DefaultCredentialProvider();
 
-  @Override
-  public void apply(Project project) {
+  public void apply(Object o) {
+    if (o instanceof Project) {
+      applyProject((Project) o);
+    } else if (o instanceof Gradle) {
+      applyGradle((Gradle) o);
+    } else {
+      throw new IllegalArgumentException(o.getClass().getName());
+    }
+  }
+
+  public void applyProject(Project project) {
     project.afterEvaluate(p -> {
       project.getRepositories().all(this::configureBuildArtifactsRepositories);
       final PublishingExtension publishingExtension = project.getExtensions().findByType(PublishingExtension.class);
       if (publishingExtension != null) {
         publishingExtension.getRepositories().all(this::configureBuildArtifactsRepositories);
       }
+    });
+  }
+
+  public void applyGradle(Gradle gradle) {
+    gradle.settingsEvaluated​(s -> {
+      final PluginManagementSpec pluginManagement = s.getPluginManagement();
+      if (pluginManagement != null) {
+        pluginManagement.getRepositories().all(this::configureBuildArtifactsRepositories);
+      }
+    });
+
+    gradle.projectsEvaluated(g -> {
+      g.allprojects(p -> {
+        p.getRepositories().all(this::configureBuildArtifactsRepositories);
+        final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
+        if (publishingExtension != null) {
+          publishingExtension.getRepositories().all(this::configureBuildArtifactsRepositories);
+        }
+      });
     });
   }
 
@@ -90,7 +120,7 @@ public class BuildArtifactsGradlePlugin implements Plugin<Project> {
           return;
         }
         final DefaultMavenArtifactRepository cbaRepo = (DefaultMavenArtifactRepository) repo;
-        final URI u = cbaRepo.getUrl(); 
+        final URI u = cbaRepo.getUrl();
         if (u != null && u.getScheme() != null && u.getScheme().equals("buildartifacts")) {
           try {
             cbaRepo.setUrl(new URI("https", u.getHost(), u.getPath(), u.getFragment()));
