@@ -26,10 +26,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
-import org.gradle.api.artifacts.repositories.AuthenticationContainer;
 import org.gradle.api.artifacts.repositories.PasswordCredentials;
-import org.gradle.api.Action;
-import org.gradle.api.credentials.Credentials;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.invocation.Gradle;
@@ -47,7 +44,7 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
     private String username;
     private String password;
 
-    public BuildArtifactsPasswordCredentials(String username, String password) {
+    BuildArtifactsPasswordCredentials(String username, String password) {
       this.username = username;
       this.password = password;
     }
@@ -75,6 +72,7 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
 
   private CredentialProvider credentialProvider = new DefaultCredentialProvider();
 
+  @Override
   public void apply(Object o) {
     if (o instanceof Project) {
       applyProject((Project) o);
@@ -86,31 +84,22 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
   }
 
   // The plugin for Gradle will apply CBA repo settings inside settings.gradle and build.gradle.
-  public void applyGradle(Gradle gradle) {
-    gradle.settingsEvaluated​(s -> {
-      modifySettings(s);
-    });
-
-    gradle.projectsEvaluated(g -> {
-      g.allprojects(p -> {
-       modifyProject(p);
-      });
-    });
+  void applyGradle(Gradle gradle) {
+    gradle.settingsEvaluated​(s -> modifySettings(s));
+    gradle.projectsEvaluated(g -> g.allprojects(p -> modifyProject(p)));
   }
 
   // The plugin for settings will apply CBA repo settings inside settings.gradle and build.gradle.
-  public void applySettings(Settings settings) {
+  void applySettings(Settings settings) {
     applyGradle(settings.getGradle());
   }
 
   // The plugin for projects will only apply CBA repo settings inside build.gradle.
-  public void applyProject(Project project) {
-    project.afterEvaluate(p -> {
-      modifyProject(p);
-    });
+  void applyProject(Project project) {
+    project.afterEvaluate(p -> modifyProject(p));
   }
 
-  public void modifyProject(Project p) {
+  void modifyProject(Project p) {
     p.getRepositories().all(this::configureBuildArtifactsRepositories);
     final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
     if (publishingExtension != null) {
@@ -118,14 +107,14 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
     }
   }
 
-  public void modifySettings(Settings s) {
+  void modifySettings(Settings s) {
     final PluginManagementSpec pluginManagement = s.getPluginManagement();
     if (pluginManagement != null) {
       pluginManagement.getRepositories().all(this::configureBuildArtifactsRepositories);
     }
   }
 
-  public void configureBuildArtifactsRepositories(ArtifactRepository repo)
+  void configureBuildArtifactsRepositories(ArtifactRepository repo)
       throws ProjectConfigurationException, UncheckedIOException
       {
         if (!(repo instanceof DefaultMavenArtifactRepository)) {
@@ -147,13 +136,8 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
               AccessToken accessToken = credentials.getAccessToken();
               String token = accessToken.getTokenValue();
               BuildArtifactsPasswordCredentials crd = new BuildArtifactsPasswordCredentials("oauth2accesstoken", token);
-              cbaRepo.setConfiguredCredentials((Credentials)crd);
-              cbaRepo.authentication(new Action<AuthenticationContainer>() {
-                @Override
-                public void execute(AuthenticationContainer authenticationContainer) {
-                  authenticationContainer.add(new DefaultBasicAuthentication("basic"));
-                }
-              });
+              cbaRepo.setConfiguredCredentials(crd);
+              cbaRepo.authentication(authenticationContainer -> authenticationContainer.add(new DefaultBasicAuthentication("basic")));
             } catch (IOException e) {
               throw new UncheckedIOException("Failed to get access token from gcloud or Application Default Credentials", e);
             }
