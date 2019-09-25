@@ -84,22 +84,22 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
   }
 
   // The plugin for Gradle will apply CBA repo settings inside settings.gradle and build.gradle.
-  void applyGradle(Gradle gradle) {
+  private void applyGradle(Gradle gradle) {
     gradle.settingsEvaluated​(s -> modifySettings(s));
     gradle.projectsEvaluated(g -> g.allprojects(p -> modifyProject(p)));
   }
 
   // The plugin for settings will apply CBA repo settings inside settings.gradle and build.gradle.
-  void applySettings(Settings settings) {
+  private void applySettings(Settings settings) {
     applyGradle(settings.getGradle());
   }
 
   // The plugin for projects will only apply CBA repo settings inside build.gradle.
-  void applyProject(Project project) {
+  private void applyProject(Project project) {
     project.afterEvaluate(p -> modifyProject(p));
   }
 
-  void modifyProject(Project p) {
+  private void modifyProject(Project p) {
     p.getRepositories().all(this::configureBuildArtifactsRepositories);
     final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
     if (publishingExtension != null) {
@@ -107,14 +107,14 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
     }
   }
 
-  void modifySettings(Settings s) {
+  private void modifySettings(Settings s) {
     final PluginManagementSpec pluginManagement = s.getPluginManagement();
     if (pluginManagement != null) {
       pluginManagement.getRepositories().all(this::configureBuildArtifactsRepositories);
     }
   }
 
-  void configureBuildArtifactsRepositories(ArtifactRepository repo)
+  private void configureBuildArtifactsRepositories(ArtifactRepository repo)
       throws ProjectConfigurationException, UncheckedIOException
       {
         if (!(repo instanceof DefaultMavenArtifactRepository)) {
