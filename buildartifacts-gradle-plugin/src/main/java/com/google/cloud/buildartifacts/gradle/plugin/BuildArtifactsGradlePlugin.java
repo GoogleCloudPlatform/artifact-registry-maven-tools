@@ -26,25 +26,25 @@ import java.net.URI;
 import java.net.URISyntaxException;
 
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
-import org.gradle.api.artifacts.repositories.AuthenticationContainer;
 import org.gradle.api.artifacts.repositories.PasswordCredentials;
-import org.gradle.api.Action;
-import org.gradle.api.credentials.Credentials;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
+import org.gradle.api.initialization.Settings;
+import org.gradle.api.invocation.Gradle;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.ProjectConfigurationException;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.internal.authentication.DefaultBasicAuthentication;
+import org.gradle.plugin.management.PluginManagementSpec;
 
-public class BuildArtifactsGradlePlugin implements Plugin<Project> {
+public class BuildArtifactsGradlePlugin implements Plugin<Object> {
 
   static class BuildArtifactsPasswordCredentials implements PasswordCredentials {
     private String username;
     private String password;
 
-    public BuildArtifactsPasswordCredentials(String username, String password) {
+    BuildArtifactsPasswordCredentials(String username, String password) {
       this.username = username;
       this.password = password;
     }
@@ -73,24 +73,55 @@ public class BuildArtifactsGradlePlugin implements Plugin<Project> {
   private CredentialProvider credentialProvider = new DefaultCredentialProvider();
 
   @Override
-  public void apply(Project project) {
-    project.afterEvaluate(p -> {
-      project.getRepositories().all(this::configureBuildArtifactsRepositories);
-      final PublishingExtension publishingExtension = project.getExtensions().findByType(PublishingExtension.class);
-      if (publishingExtension != null) {
-        publishingExtension.getRepositories().all(this::configureBuildArtifactsRepositories);
-      }
-    });
+  public void apply(Object o) {
+    if (o instanceof Project) {
+      applyProject((Project) o);
+    } else if (o instanceof Gradle) {
+      applyGradle((Gradle) o);
+    } else if (o instanceof Settings) {
+      applySettings((Settings) o);
+    }
   }
 
-  public void configureBuildArtifactsRepositories(ArtifactRepository repo)
+  // The plugin for Gradle will apply CBA repo settings inside settings.gradle and build.gradle.
+  private void applyGradle(Gradle gradle) {
+    gradle.settingsEvaluated​(s -> modifySettings(s));
+    gradle.projectsEvaluated(g -> g.allprojects(p -> modifyProject(p)));
+  }
+
+  // The plugin for settings will apply CBA repo settings inside settings.gradle and build.gradle.
+  private void applySettings(Settings settings) {
+    applyGradle(settings.getGradle());
+  }
+
+  // The plugin for projects will only apply CBA repo settings inside build.gradle.
+  private void applyProject(Project project) {
+    project.afterEvaluate(p -> modifyProject(p));
+  }
+
+  private void modifyProject(Project p) {
+    p.getRepositories().all(this::configureBuildArtifactsRepository);
+    final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
+    if (publishingExtension != null) {
+      publishingExtension.getRepositories().all(this::configureBuildArtifactsRepository);
+    }
+  }
+
+  private void modifySettings(Settings s) {
+    final PluginManagementSpec pluginManagement = s.getPluginManagement();
+    if (pluginManagement != null) {
+      pluginManagement.getRepositories().all(this::configureBuildArtifactsRepository);
+    }
+  }
+
+  private void configureBuildArtifactsRepository(ArtifactRepository repo)
       throws ProjectConfigurationException, UncheckedIOException
       {
         if (!(repo instanceof DefaultMavenArtifactRepository)) {
           return;
         }
         final DefaultMavenArtifactRepository cbaRepo = (DefaultMavenArtifactRepository) repo;
-        final URI u = cbaRepo.getUrl(); 
+        final URI u = cbaRepo.getUrl();
         if (u != null && u.getScheme() != null && u.getScheme().equals("buildartifacts")) {
           try {
             cbaRepo.setUrl(new URI("https", u.getHost(), u.getPath(), u.getFragment()));
@@ -105,13 +136,8 @@ public class BuildArtifactsGradlePlugin implements Plugin<Project> {
               AccessToken accessToken = credentials.getAccessToken();
               String token = accessToken.getTokenValue();
               BuildArtifactsPasswordCredentials crd = new BuildArtifactsPasswordCredentials("oauth2accesstoken", token);
-              cbaRepo.setConfiguredCredentials((Credentials)crd);
-              cbaRepo.authentication(new Action<AuthenticationContainer>() {
-                @Override
-                public void execute(AuthenticationContainer authenticationContainer) {
-                  authenticationContainer.add(new DefaultBasicAuthentication("basic"));
-                }
-              });
+              cbaRepo.setConfiguredCredentials(crd);
+              cbaRepo.authentication(authenticationContainer -> authenticationContainer.add(new DefaultBasicAuthentication("basic")));
             } catch (IOException e) {
               throw new UncheckedIOException("Failed to get access token from gcloud or Application Default Credentials", e);
             }
@@ -119,4 +145,3 @@ public class BuildArtifactsGradlePlugin implements Plugin<Project> {
         }
       }
 }
-
