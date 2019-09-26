@@ -100,21 +100,21 @@ public class BuildArtifactsGradlePlugin implements Plugin<Object> {
   }
 
   private void modifyProject(Project p) {
-    p.getRepositories().all(this::configureBuildArtifactsRepositories);
+    p.getRepositories().all(this::configureBuildArtifactsRepository);
     final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
     if (publishingExtension != null) {
-      publishingExtension.getRepositories().all(this::configureBuildArtifactsRepositories);
+      publishingExtension.getRepositories().all(this::configureBuildArtifactsRepository);
     }
   }
 
   private void modifySettings(Settings s) {
     final PluginManagementSpec pluginManagement = s.getPluginManagement();
     if (pluginManagement != null) {
-      pluginManagement.getRepositories().all(this::configureBuildArtifactsRepositories);
+      pluginManagement.getRepositories().all(this::configureBuildArtifactsRepository);
     }
   }
 
-  private void configureBuildArtifactsRepositories(ArtifactRepository repo)
+  private void configureBuildArtifactsRepository(ArtifactRepository repo)
       throws ProjectConfigurationException, UncheckedIOException
       {
         if (!(repo instanceof DefaultMavenArtifactRepository)) {
