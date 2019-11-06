@@ -58,9 +58,15 @@ public class GcloudCredentials extends GoogleCredentials {
     }
   }
 
+  private static String gCloudCommand() {
+    boolean isWindows = System.getProperty("os.name").startsWith("Windows");
+    return isWindows ? "gcloud.cmd" : "gcloud";
+  }
+
   private static AccessToken getGcloudAccessToken() throws IOException {
     ProcessBuilder processBuilder = new ProcessBuilder();
-    processBuilder.command("gcloud", "config", "config-helper", "--format=json(credential)");
+    String gcloud = gCloudCommand();
+    processBuilder.command(gcloud, "config", "config-helper", "--format=json(credential)");
     Process process = processBuilder.start();
     try {
       int exitCode = process.waitFor();
