@@ -24,7 +24,7 @@ To enable the wagon, add the following configuration to the `pom.xml` in your pr
         <extension>
             <groupId>com.google.cloud.buildartifacts</groupId>
             <artifactId>buildartifacts-maven-wagon</artifactId>
-            <version>1.2.0</version>
+            <version>1.2.1</version>
         </extension>
     </extensions>
 ```
@@ -58,7 +58,7 @@ To use Cloud Build Artifacts repositories with gradle, add the following configu
 
 ```gradle
 plugins {
-  id "com.google.cloud.buildartifacts.gradle-plugin" version "1.2.0"
+  id "com.google.cloud.buildartifacts.gradle-plugin" version "1.2.1"
 }
 
 repositories {
@@ -94,7 +94,7 @@ initscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.google.cloud.buildartifacts:buildartifacts-gradle-plugin:1.2.0"
+    classpath "gradle.plugin.com.google.cloud.buildartifacts:buildartifacts-gradle-plugin:1.2.1"
   }
 }
 
@@ -111,7 +111,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.google.cloud.buildartifacts:buildartifacts-gradle-plugin:1.2.0"
+    classpath "gradle.plugin.com.google.cloud.buildartifacts:buildartifacts-gradle-plugin:1.2.1"
   }
 }
 
