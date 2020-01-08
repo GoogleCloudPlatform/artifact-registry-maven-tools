@@ -1,11 +1,10 @@
-# Cloud Build Artifacts Maven Tools
+# Artifact Registry Maven Tools
 
-This repository contains tools to help with interacting with Maven repositories hosted on Cloud
-Build Artifacts.
+This repository contains tools to help with interacting with Maven repositories hosted on Artifact Registry.
 
 ## Authentication
 
-Requests to Cloud Build Artifacts will be authenticated using credentials from the environment. The
+Requests to Artifact Registry will be authenticated using credentials from the environment. The
 tools described below search the environment for credentials in the following order:
 1. From the `gcloud` SDK. (i.e., the access token printed via `gcloud config config-helper --format='value(credential.access_token)'`)
     * Hint: You can see which account is active with the command `gcloud config config-helper --format='value(configuration.properties.core.account)'`
@@ -13,29 +12,29 @@ tools described below search the environment for credentials in the following or
 
 ## Maven Setup
 
-The Cloud Build Artifacts Wagon is an implementation of the
+The Artifact Registry Wagon is an implementation of the
 [Maven Wagon API](https://maven.apache.org/wagon/) which allows you to configure Maven to interact
-with repositories stored in Cloud Build Artifacts.
+with repositories stored in Artifact Registry.
 
 To enable the wagon, add the following configuration to the `pom.xml` in your project root:
 
 ```xml
     <extensions>
         <extension>
-            <groupId>com.google.cloud.buildartifacts</groupId>
-            <artifactId>buildartifacts-maven-wagon</artifactId>
-            <version>1.2.1</version>
+            <groupId>com.google.cloud.artifactregistry</groupId>
+            <artifactId>artifactregistry-maven-wagon</artifactId>
+            <version>2.0.0</version>
         </extension>
     </extensions>
 ```
 
-You can then configure repositories by using the "buildartifacts://" prefix:
+You can then configure repositories by using the "artifactregistry://" prefix:
 
 ```xml
   <repositories>
     <repository>
       <id>my-repository</id>
-      <url>buildartifacts://maven.pkg.dev/PROJECT_ID/REPOSITORY_ID</url>
+      <url>artifactregistry://maven.pkg.dev/PROJECT_ID/REPOSITORY_ID</url>
       <releases>
         <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
@@ -53,24 +52,24 @@ Where
 
 ## Gradle Setup
 
-To use Cloud Build Artifacts repositories with gradle, add the following configuration to the
+To use Artifact Registry repositories with gradle, add the following configuration to the
 `build.gradle` file in your project.
 
 ```gradle
 plugins {
-  id "com.google.cloud.buildartifacts.gradle-plugin" version "1.2.1"
+  id "com.google.cloud.artifactregistry.gradle-plugin" version "2.0.0"
 }
 
 repositories {
     maven {
-      url 'buildartifacts://maven.pkg.dev/PROJECT_ID/REPOSITORY_ID'
+      url 'artifactregistry://maven.pkg.dev/PROJECT_ID/REPOSITORY_ID'
     }
 }
 
 publishing {
     repositories {
         maven {
-          url 'buildartifacts://maven.pkg.dev/PROJECT_ID/REPOSITORY_ID'
+          url 'artifactregistry://maven.pkg.dev/PROJECT_ID/REPOSITORY_ID'
         }
     }
 }
@@ -82,7 +81,7 @@ Where
 
 ### Alternatives
 
-If you need to use BuildArtifacts repositories inside your `init.gradle` or `settings.gradle`, the plugin can also be used inside `init.gradle` or `settings.gradle` files. 
+If you need to use Artifact Registry repositories inside your `init.gradle` or `settings.gradle`, the plugin can also be used inside `init.gradle` or `settings.gradle` files. 
 
 * To use plugin inside `init.gradle` file:
 
@@ -94,11 +93,11 @@ initscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.google.cloud.buildartifacts:buildartifacts-gradle-plugin:1.2.1"
+    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:2.0.0"
   }
 }
 
-apply plugin: com.google.cloud.buildartifacts.gradle.plugin.BuildArtifactsGradlePlugin
+apply plugin: com.google.cloud.artifactregistry.gradle.plugin.ArtifactRegistryGradlePlugin
 ```
 
 * To use plugin inside `settings.gradle` file:
@@ -111,9 +110,9 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.google.cloud.buildartifacts:buildartifacts-gradle-plugin:1.2.1"
+    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:1.2.1"
   }
 }
 
-apply plugin: "com.google.cloud.buildartifacts.gradle-plugin"
+apply plugin: "com.google.cloud.artifactregistry.gradle-plugin"
 ```

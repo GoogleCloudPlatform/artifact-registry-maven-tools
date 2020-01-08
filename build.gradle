@@ -19,13 +19,15 @@ plugins {
     id 'signing'
 }
 
-description = 'Cloud Build Artifacts Maven Tools'
+description = 'Artifact Registry Maven Tools'
+ext.project_version = '2.0.0-SNAPSHOT'
+ext.isReleaseVersion = !project_version.endsWith("SNAPSHOT")
 
 allprojects {
     apply plugin: 'java'
     apply plugin: 'maven'
-    group = 'com.google.cloud.buildartifacts'
-    version = '1.2.2-SNAPSHOT'
+    group = 'com.google.cloud.artifactregistry'
+    version = project_version
     sourceCompatibility = 1.8
     targetCompatibility = 1.8
     tasks.withType(JavaCompile) {
@@ -77,8 +79,8 @@ def commonPomAttributes(pom) {
 publishing {
     publications {
         wagon(MavenPublication) {
-            artifactId = "buildartifacts-maven-wagon"
-            def project = project(":buildartifacts-maven-wagon")
+            artifactId = "artifactregistry-maven-wagon"
+            def project = project(":artifactregistry-maven-wagon")
             from project.components.java
             artifact(project.sourcesJar) {
                 classifier = 'sources'
@@ -88,13 +90,13 @@ publishing {
             }
             commonPomAttributes(pom)
             pom {
-                name = 'Cloud Build Artifacts Maven Wagon'
-                description = 'A Maven wagon used to connect to Cloud Build Artifacts Maven repositories.'
+                name = 'Artifact Registry Maven Wagon'
+                description = 'A Maven wagon used to connect to Artifact Registry Maven repositories.'
             }
         }
         authCommon(MavenPublication) {
-            artifactId = "buildartifacts-auth-common"
-            def project = project(":buildartifacts-auth-common")
+            artifactId = "artifactregistry-auth-common"
+            def project = project(":artifactregistry-auth-common")
             from project.components.java
             artifact(project.sourcesJar) {
                 classifier = 'sources'
@@ -104,8 +106,8 @@ publishing {
             }
             commonPomAttributes(pom)
             pom {
-                name = 'Cloud Build Artifacts common authentication library'
-                description = 'Common authentication library for connecting to Cloud Build Artifacts.'
+                name = 'Artifact Registry common authentication library'
+                description = 'Common authentication library for connecting to Artifact Registry.'
             }
         }
     }
@@ -123,15 +125,19 @@ publishing {
     }
 }
 
-project(":buildartifacts-maven-wagon") {
+signing {
+    required { isReleaseVersion && gradle.taskGraph.hasTask("publish") }
+}
+
+project(":artifactregistry-maven-wagon") {
     dependencies {
-        compile project(":buildartifacts-auth-common")
+        compile project(":artifactregistry-auth-common")
     }
 }
 
-project(":buildartifacts-gradle-plugin") {
+project(":artifactregistry-gradle-plugin") {
     dependencies {
-        compile project(":buildartifacts-auth-common")
+        compile project(":artifactregistry-auth-common")
     }
 }
 
