@@ -28,13 +28,15 @@ To enable the wagon, add the following configuration to the `pom.xml` in your pr
     </extensions>
 ```
 
-You can then configure repositories by using the "artifactregistry://" prefix:
+You can then configure repositories by using the "artifactregistry://" prefix.
+In this example the repository is in 'us-west1', you should use the correct
+location for your repository.
 
 ```xml
   <repositories>
     <repository>
       <id>my-repository</id>
-      <url>artifactregistry://maven.pkg.dev/PROJECT_ID/REPOSITORY_ID</url>
+      <url>artifactregistry://us-west1-maven.pkg.dev/PROJECT_ID/REPOSITORY_ID</url>
       <releases>
         <enabled>true</enabled>
         <updatePolicy>always</updatePolicy>
@@ -53,7 +55,8 @@ Where
 ## Gradle Setup
 
 To use Artifact Registry repositories with gradle, add the following configuration to the
-`build.gradle` file in your project.
+`build.gradle` file in your project. In this example the repository is in 'us-west1', 
+you should use the correct location for your repository.
 
 ```gradle
 plugins {
@@ -62,14 +65,14 @@ plugins {
 
 repositories {
     maven {
-      url 'artifactregistry://maven.pkg.dev/PROJECT_ID/REPOSITORY_ID'
+      url 'artifactregistry://us-west1-maven.pkg.dev/PROJECT_ID/REPOSITORY_ID'
     }
 }
 
 publishing {
     repositories {
         maven {
-          url 'artifactregistry://maven.pkg.dev/PROJECT_ID/REPOSITORY_ID'
+          url 'artifactregistry://us-west1-maven.pkg.dev/PROJECT_ID/REPOSITORY_ID'
         }
     }
 }
