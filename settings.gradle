@@ -1,4 +1,4 @@
-rootProject.name = 'buildartifacts-maven-tools'
-include 'buildartifacts-maven-wagon'
-include 'buildartifacts-auth-common'
-include 'buildartifacts-gradle-plugin'
+rootProject.name = 'artifactregistry-maven-tools'
+include 'artifactregistry-maven-wagon'
+include 'artifactregistry-auth-common'
+include 'artifactregistry-gradle-plugin'
