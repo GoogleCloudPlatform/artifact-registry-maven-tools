@@ -11,7 +11,7 @@ dependencies {
 pluginBundle {
     website = 'https://github.com/GoogleCloudPlatform/build-artifacts-maven-tools' 
     vcsUrl = 'https://github.com/GoogleCloudPlatform/build-artifacts-maven-tools' 
-    tags = ['buildartifacts', 'gcp'] 
+    tags = ['artifactregistry', 'gcp'] 
 }
 
 gradlePlugin {
@@ -24,3 +24,4 @@ gradlePlugin {
         }
     }
 }
+
