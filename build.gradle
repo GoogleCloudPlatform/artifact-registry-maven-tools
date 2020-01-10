@@ -70,9 +70,9 @@ def commonPomAttributes(pom) {
         }
     }
     pom.scm {
-        connection = "scm:git:https://github.com/GoogleCloudPlatform/build-artifacts-maven-tools.git"
-        developerConnection = "scm:git:https://github.com/GoogleCloudPlatform/build-artifacts-maven-tools.git"
-        url = "https://github.com/GoogleCloudPlatform/build-artifacts-maven-tools"
+        connection = "scm:git:https://github.com/GoogleCloudPlatform/artifact-registry-maven-tools.git"
+        developerConnection = "scm:git:https://github.com/GoogleCloudPlatform/artifact-registry-maven-tools.git"
+        url = "https://github.com/GoogleCloudPlatform/artifact-registry-maven-tools"
     }
 }
 
