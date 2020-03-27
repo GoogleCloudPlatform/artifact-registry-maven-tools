@@ -23,7 +23,7 @@ To enable the wagon, add the following configuration to the `pom.xml` in your pr
         <extension>
             <groupId>com.google.cloud.artifactregistry</groupId>
             <artifactId>artifactregistry-maven-wagon</artifactId>
-            <version>2.0.0</version>
+            <version>2.0.1</version>
         </extension>
     </extensions>
 ```
@@ -60,7 +60,7 @@ you should use the correct location for your repository.
 
 ```gradle
 plugins {
-  id "com.google.cloud.artifactregistry.gradle-plugin" version "2.0.0"
+  id "com.google.cloud.artifactregistry.gradle-plugin" version "2.0.1"
 }
 
 repositories {
@@ -96,7 +96,7 @@ initscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:2.0.0"
+    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:2.0.1"
   }
 }
 
@@ -113,7 +113,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:1.2.1"
+    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:2.0.1"
   }
 }
 
