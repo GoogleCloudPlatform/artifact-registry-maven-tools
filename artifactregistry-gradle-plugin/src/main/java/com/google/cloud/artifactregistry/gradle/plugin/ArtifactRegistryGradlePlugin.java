@@ -74,47 +74,58 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
 
   @Override
   public void apply(Object o) {
+    ArtifactRegistryPasswordCredentials crd;
+    try {
+      GoogleCredentials credentials = (GoogleCredentials)credentialProvider.getCredential();
+      credentials.refreshIfExpired();
+      AccessToken accessToken = credentials.getAccessToken();
+      String token = accessToken.getTokenValue();
+      crd = new ArtifactRegistryPasswordCredentials("oauth2accesstoken", token);
+    } catch (IOException e) {
+      throw new UncheckedIOException("Failed to get access token from gcloud or Application Default Credentials", e);
+    }
+
     if (o instanceof Project) {
-      applyProject((Project) o);
+      applyProject((Project) o, crd);
     } else if (o instanceof Gradle) {
-      applyGradle((Gradle) o);
+      applyGradle((Gradle) o, crd);
     } else if (o instanceof Settings) {
-      applySettings((Settings) o);
+      applySettings((Settings) o, crd);
     }
   }
 
   // The plugin for Gradle will apply CBA repo settings inside settings.gradle and build.gradle.
-  private void applyGradle(Gradle gradle) {
-    gradle.settingsEvaluated​(s -> modifySettings(s));
-    gradle.projectsEvaluated(g -> g.allprojects(p -> modifyProject(p)));
+  private void applyGradle(Gradle gradle, ArtifactRegistryPasswordCredentials crd) {
+    gradle.settingsEvaluated​(s -> modifySettings(s, crd));
+    gradle.projectsEvaluated(g -> g.allprojects(p -> modifyProject(p, crd)));
   }
 
   // The plugin for settings will apply CBA repo settings inside settings.gradle and build.gradle.
-  private void applySettings(Settings settings) {
-    applyGradle(settings.getGradle());
+  private void applySettings(Settings settings, ArtifactRegistryPasswordCredentials crd) {
+    applyGradle(settings.getGradle(), crd);
   }
 
   // The plugin for projects will only apply CBA repo settings inside build.gradle.
-  private void applyProject(Project project) {
-    project.afterEvaluate(p -> modifyProject(p));
+  private void applyProject(Project project, ArtifactRegistryPasswordCredentials crd) {
+    project.afterEvaluate(p -> modifyProject(p, crd));
   }
 
-  private void modifyProject(Project p) {
-    p.getRepositories().all(this::configureArtifactRegistryRepository);
+  private void modifyProject(Project p, ArtifactRegistryPasswordCredentials crd) {
+    p.getRepositories().forEach(r -> configureArtifactRegistryRepository(r, crd));
     final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
     if (publishingExtension != null) {
-      publishingExtension.getRepositories().all(this::configureArtifactRegistryRepository);
+      publishingExtension.getRepositories().forEach(r -> configureArtifactRegistryRepository(r, crd));
     }
   }
 
-  private void modifySettings(Settings s) {
+  private void modifySettings(Settings s, ArtifactRegistryPasswordCredentials crd) {
     final PluginManagementSpec pluginManagement = s.getPluginManagement();
     if (pluginManagement != null) {
-      pluginManagement.getRepositories().all(this::configureArtifactRegistryRepository);
+      pluginManagement.getRepositories().forEach(r -> configureArtifactRegistryRepository(r, crd));
     }
   }
 
-  private void configureArtifactRegistryRepository(ArtifactRepository repo)
+  private void configureArtifactRegistryRepository(ArtifactRepository repo, ArtifactRegistryPasswordCredentials crd)
       throws ProjectConfigurationException, UncheckedIOException
       {
         if (!(repo instanceof DefaultMavenArtifactRepository)) {
@@ -130,17 +141,8 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
           }
 
           if (cbaRepo.getConfiguredCredentials() == null) {
-            try {
-              GoogleCredentials credentials = (GoogleCredentials)credentialProvider.getCredential();
-              credentials.refreshIfExpired();
-              AccessToken accessToken = credentials.getAccessToken();
-              String token = accessToken.getTokenValue();
-              ArtifactRegistryPasswordCredentials crd = new ArtifactRegistryPasswordCredentials("oauth2accesstoken", token);
-              cbaRepo.setConfiguredCredentials(crd);
-              cbaRepo.authentication(authenticationContainer -> authenticationContainer.add(new DefaultBasicAuthentication("basic")));
-            } catch (IOException e) {
-              throw new UncheckedIOException("Failed to get access token from gcloud or Application Default Credentials", e);
-            }
+            cbaRepo.setConfiguredCredentials(crd);
+            cbaRepo.authentication(authenticationContainer -> authenticationContainer.add(new DefaultBasicAuthentication("basic")));
           }
         }
       }
