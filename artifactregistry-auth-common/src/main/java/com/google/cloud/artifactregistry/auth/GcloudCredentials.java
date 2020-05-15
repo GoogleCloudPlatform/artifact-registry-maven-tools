@@ -20,6 +20,7 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.GenericData;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
+import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -27,12 +28,13 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.logging.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GcloudCredentials extends GoogleCredentials {
 
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-  private static final Logger LOGGER = Logger.getLogger(GcloudCredentials.class.getName());
+  private static final Logger LOGGER = LoggerFactory.getLogger(GcloudCredentials.class.getName());
 
   private static final String KEY_ACCESS_TOKEN = "access_token";
   private static final String KEY_TOKEN_EXPIRY = "token_expiry";
@@ -48,13 +50,14 @@ public class GcloudCredentials extends GoogleCredentials {
 
   /**
    * Tries to get credentials from gcloud. Returns null if credentials are not available.
+   * @return The Credentials from gcloud
+   * @throws IOException if there was an error retrieving credentials from gcloud
    */
-  public static GcloudCredentials tryCreateGcloudCredentials() {
+  public static GcloudCredentials tryCreateGcloudCredentials() throws IOException {
     try {
       return new GcloudCredentials(getGcloudAccessToken());
     } catch (IOException e) {
-      LOGGER.fine("Failed to get credentials from gcloud: " + e.getMessage());
-      return null;
+      throw new IOException("Failed to get credentials from gcloud: " + e.getMessage());
     }
   }
 
