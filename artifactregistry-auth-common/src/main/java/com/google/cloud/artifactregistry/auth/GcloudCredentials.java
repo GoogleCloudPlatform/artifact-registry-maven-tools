@@ -20,8 +20,6 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.GenericData;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
-import java.io.BufferedReader;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -31,23 +29,16 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class GcloudCredentials extends GoogleCredentials {
 
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-  private static final Logger LOGGER = LoggerFactory.getLogger(GcloudCredentials.class.getName());
-
   private static final String KEY_ACCESS_TOKEN = "access_token";
   private static final String KEY_TOKEN_EXPIRY = "token_expiry";
 
   private GcloudCredentials(AccessToken initialToken) {
     super(initialToken);
   }
-
-
-
 
   @Override
   public AccessToken refreshAccessToken() throws IOException {
@@ -63,7 +54,7 @@ public class GcloudCredentials extends GoogleCredentials {
     try {
       return new GcloudCredentials(getGcloudAccessToken());
     } catch (IOException e) {
-      throw new IOException("Failed to get credentials from gcloud: " + e.getMessage());
+      throw new IOException("Failed to get access token from gcloud: " + e.getMessage());
     }
   }
 
