@@ -109,5 +109,4 @@ public class GcloudCredentials extends GoogleCredentials {
     }
     return output.toString();
   }
-
 }
