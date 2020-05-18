@@ -6,9 +6,10 @@ This repository contains tools to help with interacting with Maven repositories 
 
 Requests to Artifact Registry will be authenticated using credentials from the environment. The
 tools described below search the environment for credentials in the following order:
+1. [Google Application Default Credentials](https://developers.google.com/accounts/docs/application-default-credentials).
+    * Note: It is possible to set Application Default Credentials for a personal account via `gcloud auth login --update-adc` or `gcloud auth application-default login`
 1. From the `gcloud` SDK. (i.e., the access token printed via `gcloud config config-helper --format='value(credential.access_token)'`)
     * Hint: You can see which account is active with the command `gcloud config config-helper --format='value(configuration.properties.core.account)'`
-1. [Google Application Default Credentials](https://developers.google.com/accounts/docs/application-default-credentials).
 
 ## Maven Setup
 
@@ -55,7 +56,7 @@ Where
 ## Gradle Setup
 
 To use Artifact Registry repositories with gradle, add the following configuration to the
-`build.gradle` file in your project. In this example the repository is in 'us-west1', 
+`build.gradle` file in your project. In this example the repository is in 'us-west1',
 you should use the correct location for your repository.
 
 ```gradle
@@ -84,7 +85,7 @@ Where
 
 ### Alternatives
 
-If you need to use Artifact Registry repositories inside your `init.gradle` or `settings.gradle`, the plugin can also be used inside `init.gradle` or `settings.gradle` files. 
+If you need to use Artifact Registry repositories inside your `init.gradle` or `settings.gradle`, the plugin can also be used inside `init.gradle` or `settings.gradle` files.
 
 * To use plugin inside `init.gradle` file:
 
