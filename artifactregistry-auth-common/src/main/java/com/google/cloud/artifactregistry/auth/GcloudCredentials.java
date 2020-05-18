@@ -20,8 +20,11 @@ import com.google.api.client.json.jackson2.JacksonFactory;
 import com.google.api.client.util.GenericData;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -42,6 +45,9 @@ public class GcloudCredentials extends GoogleCredentials {
   private GcloudCredentials(AccessToken initialToken) {
     super(initialToken);
   }
+
+
+
 
   @Override
   public AccessToken refreshAccessToken() throws IOException {
@@ -73,11 +79,14 @@ public class GcloudCredentials extends GoogleCredentials {
     Process process = processBuilder.start();
     try {
       int exitCode = process.waitFor();
+      String stdOut = readStreamToString(process.getInputStream());
       if (exitCode != 0) {
-        throw new IOException("gcloud exited with status " + exitCode);
+        String stdErr = readStreamToString(process.getErrorStream());
+        throw new IOException(String.format("gcloud exited with status: %d\nOutput:\n%s\nError Output:\n%s\n",
+            exitCode, stdOut, stdErr));
       }
-      GenericData result = JSON_FACTORY
-          .fromInputStream(process.getInputStream(), GenericData.class);
+
+      GenericData result = JSON_FACTORY.fromString(stdOut, GenericData.class);
       Map credential = (Map) result.get("credential");
       if (credential == null) {
         throw new IOException("No credential returned from gcloud");
@@ -95,6 +104,19 @@ public class GcloudCredentials extends GoogleCredentials {
     } catch (ParseException e) {
       throw new IOException("Failed to parse timestamp from gcloud output", e);
     }
+  }
+
+  // Reads a stream to a string, this code is basically copied from 'copyReaderToBuilder' from
+  // com.google.io.CharStreams in the Guava library.
+  private static String readStreamToString(InputStream input) throws IOException {
+    InputStreamReader reader = new InputStreamReader(input);
+    StringBuilder output = new StringBuilder();
+    char[] buf = new char[0x800];
+    int nRead;
+    while ((nRead = reader.read(buf)) != -1) {
+      output.append(buf, 0, nRead);
+    }
+    return output.toString();
   }
 
 }

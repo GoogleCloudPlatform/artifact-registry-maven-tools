@@ -52,6 +52,7 @@ public class DefaultCredentialProvider implements CredentialProvider {
     } catch (IOException ex) {
       LOGGER.info("Failed to retrieve credentials from gcloud: " + ex.getMessage());
     }
+    
     LOGGER.info("ArtifactRegistry Maven Wagon: No credentials could be found.");
     throw new IOException("Failed to find credentials Check info logs for more details.");
   }
