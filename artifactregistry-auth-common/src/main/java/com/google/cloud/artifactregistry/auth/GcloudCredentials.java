@@ -21,19 +21,18 @@ import com.google.api.client.util.GenericData;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
-import java.util.logging.Logger;
 
 public class GcloudCredentials extends GoogleCredentials {
 
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
-  private static final Logger LOGGER = Logger.getLogger(GcloudCredentials.class.getName());
-
   private static final String KEY_ACCESS_TOKEN = "access_token";
   private static final String KEY_TOKEN_EXPIRY = "token_expiry";
 
@@ -48,13 +47,14 @@ public class GcloudCredentials extends GoogleCredentials {
 
   /**
    * Tries to get credentials from gcloud. Returns null if credentials are not available.
+   * @return The Credentials from gcloud
+   * @throws IOException if there was an error retrieving credentials from gcloud
    */
-  public static GcloudCredentials tryCreateGcloudCredentials() {
+  public static GcloudCredentials tryCreateGcloudCredentials() throws IOException {
     try {
       return new GcloudCredentials(getGcloudAccessToken());
     } catch (IOException e) {
-      LOGGER.fine("Failed to get credentials from gcloud: " + e.getMessage());
-      return null;
+      throw new IOException("Failed to get access token from gcloud: " + e.getMessage());
     }
   }
 
@@ -70,11 +70,14 @@ public class GcloudCredentials extends GoogleCredentials {
     Process process = processBuilder.start();
     try {
       int exitCode = process.waitFor();
+      String stdOut = readStreamToString(process.getInputStream());
       if (exitCode != 0) {
-        throw new IOException("gcloud exited with status " + exitCode);
+        String stdErr = readStreamToString(process.getErrorStream());
+        throw new IOException(String.format("gcloud exited with status: %d\nOutput:\n%s\nError Output:\n%s\n",
+            exitCode, stdOut, stdErr));
       }
-      GenericData result = JSON_FACTORY
-          .fromInputStream(process.getInputStream(), GenericData.class);
+
+      GenericData result = JSON_FACTORY.fromString(stdOut, GenericData.class);
       Map credential = (Map) result.get("credential");
       if (credential == null) {
         throw new IOException("No credential returned from gcloud");
@@ -94,4 +97,16 @@ public class GcloudCredentials extends GoogleCredentials {
     }
   }
 
+  // Reads a stream to a string, this code is basically copied from 'copyReaderToBuilder' from
+  // com.google.io.CharStreams in the Guava library.
+  private static String readStreamToString(InputStream input) throws IOException {
+    InputStreamReader reader = new InputStreamReader(input);
+    StringBuilder output = new StringBuilder();
+    char[] buf = new char[0x800];
+    int nRead;
+    while ((nRead = reader.read(buf)) != -1) {
+      output.append(buf, 0, nRead);
+    }
+    return output.toString();
+  }
 }
