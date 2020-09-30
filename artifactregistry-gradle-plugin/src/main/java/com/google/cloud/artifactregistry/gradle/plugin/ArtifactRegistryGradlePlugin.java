@@ -96,7 +96,7 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
 
   // The plugin for Gradle will apply CBA repo settings inside settings.gradle and build.gradle.
   private void applyGradle(Gradle gradle, ArtifactRegistryPasswordCredentials crd) {
-    gradle.settingsEvaluated​(s -> modifySettings(s, crd));
+    gradle.settingsEvaluated(s -> modifySettings(s, crd));
     gradle.projectsEvaluated(g -> g.allprojects(p -> modifyProject(p, crd)));
   }
 
