@@ -16,25 +16,23 @@
 
 package com.google.cloud.artifactregistry.gradle.plugin;
 
-import com.google.auth.oauth2.GoogleCredentials;
 import com.google.auth.oauth2.AccessToken;
+import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.artifactregistry.auth.CredentialProvider;
 import com.google.cloud.artifactregistry.auth.DefaultCredentialProvider;
-
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
-
-import org.gradle.api.artifacts.repositories.ArtifactRepository;
-import org.gradle.api.artifacts.repositories.PasswordCredentials;
-import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
-import org.gradle.api.initialization.Settings;
-import org.gradle.api.invocation.Gradle;
-import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.ProjectConfigurationException;
 import org.gradle.api.UncheckedIOException;
+import org.gradle.api.artifacts.repositories.ArtifactRepository;
+import org.gradle.api.artifacts.repositories.PasswordCredentials;
+import org.gradle.api.initialization.Settings;
+import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
+import org.gradle.api.invocation.Gradle;
+import org.gradle.api.publish.PublishingExtension;
 import org.gradle.internal.authentication.DefaultBasicAuthentication;
 import org.gradle.plugin.management.PluginManagementSpec;
 
@@ -126,24 +124,25 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
   }
 
   private void configureArtifactRegistryRepository(ArtifactRepository repo, ArtifactRegistryPasswordCredentials crd)
-      throws ProjectConfigurationException, UncheckedIOException
-      {
-        if (!(repo instanceof DefaultMavenArtifactRepository)) {
-          return;
-        }
-        final DefaultMavenArtifactRepository cbaRepo = (DefaultMavenArtifactRepository) repo;
-        final URI u = cbaRepo.getUrl();
-        if (u != null && u.getScheme() != null && u.getScheme().equals("artifactregistry")) {
-          try {
-            cbaRepo.setUrl(new URI("https", u.getHost(), u.getPath(), u.getFragment()));
-          } catch (URISyntaxException e) {
-            throw new ProjectConfigurationException(String.format("Invalid repository URL %s", u.toString()), e);
-          }
-
-          if (cbaRepo.getConfiguredCredentials() == null) {
-            cbaRepo.setConfiguredCredentials(crd);
-            cbaRepo.authentication(authenticationContainer -> authenticationContainer.add(new DefaultBasicAuthentication("basic")));
-          }
-        }
+      throws ProjectConfigurationException, UncheckedIOException {
+    if (!(repo instanceof DefaultMavenArtifactRepository)) {
+      return;
+    }
+    final DefaultMavenArtifactRepository cbaRepo = (DefaultMavenArtifactRepository) repo;
+    final URI u = cbaRepo.getUrl();
+    if (u != null && u.getScheme() != null && u.getScheme().equals("artifactregistry")) {
+      try {
+        cbaRepo.setUrl(new URI("https", u.getHost(), u.getPath(), u.getFragment()));
+      } catch (URISyntaxException e) {
+        throw new ProjectConfigurationException(
+            String.format("Invalid repository URL %s", u.toString()), e);
       }
+
+      if (cbaRepo.getConfiguredCredentials() == null) {
+        cbaRepo.setConfiguredCredentials(crd);
+        cbaRepo.authentication(authenticationContainer -> authenticationContainer
+            .add(new DefaultBasicAuthentication("basic")));
+      }
+    }
+  }
 }
