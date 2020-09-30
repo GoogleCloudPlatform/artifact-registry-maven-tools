@@ -21,6 +21,7 @@ import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.artifactregistry.auth.CredentialProvider;
 import com.google.cloud.artifactregistry.auth.DefaultCredentialProvider;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.gradle.api.Plugin;
@@ -29,14 +30,20 @@ import org.gradle.api.ProjectConfigurationException;
 import org.gradle.api.UncheckedIOException;
 import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.artifacts.repositories.PasswordCredentials;
+import org.gradle.api.credentials.Credentials;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
 import org.gradle.api.invocation.Gradle;
+import org.gradle.api.provider.Property;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.internal.authentication.DefaultBasicAuthentication;
 import org.gradle.plugin.management.PluginManagementSpec;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
+
+  private static final Logger logger = LoggerFactory.getLogger(ArtifactRegistryGradlePlugin.class);
 
   static class ArtifactRegistryPasswordCredentials implements PasswordCredentials {
     private String username;
@@ -68,7 +75,7 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
     }
   }
 
-  private CredentialProvider credentialProvider = new DefaultCredentialProvider();
+  private final CredentialProvider credentialProvider = new DefaultCredentialProvider();
 
   @Override
   public void apply(Object o) {
@@ -138,11 +145,42 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
             String.format("Invalid repository URL %s", u.toString()), e);
       }
 
-      if (cbaRepo.getConfiguredCredentials() == null) {
+      if (shouldStoreCredentials(cbaRepo)) {
         cbaRepo.setConfiguredCredentials(crd);
         cbaRepo.authentication(authenticationContainer -> authenticationContainer
             .add(new DefaultBasicAuthentication("basic")));
       }
+    }
+  }
+
+  // This is a shim to work around an incompatible API change in Gradle 6.6. Prior to that,
+  // AbstractAuthenticationSupportedRepository#getConfiguredCredentials() returned a (possibly null)
+  // Credentials object. In 6.6, it changed to return Property<Credentials>.
+  //
+  // Compiling this plugin against Gradle 6.5 results in a NoSuchMethodException if you run it under
+  // Gradle 6.6. The same thing happens if you compile against 6.6 and run it in 6.5.
+  //
+  // So we have to use reflection to inspect the return type.
+  private static boolean shouldStoreCredentials(DefaultMavenArtifactRepository repo) {
+
+    try {
+      Method getConfiguredCredentials = DefaultMavenArtifactRepository.class
+          .getMethod("getConfiguredCredentials");
+
+      // This is for Gradle < 6.6. Once we no longer support versions of Gradle before 6.6
+      if (getConfiguredCredentials.getReturnType().equals(Credentials.class)) {
+        Credentials existingCredentials = (Credentials) getConfiguredCredentials.invoke(repo);
+        return existingCredentials == null;
+      } else if (getConfiguredCredentials.getReturnType().equals(Property.class)) {
+        Property<?> existingCredentials = (Property<?>) getConfiguredCredentials.invoke(repo);
+        return !existingCredentials.isPresent();
+      } else {
+        logger.warn("Error determining Gradle credentials API; expect authentication errors");
+        return false;
+      }
+    } catch (ReflectiveOperationException e) {
+      logger.warn("Error determining Gradle credentials API; expect authentication errors", e);
+      return false;
     }
   }
 }
