@@ -36,6 +36,7 @@ import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactReposi
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.provider.Property;
 import org.gradle.api.publish.PublishingExtension;
+import org.gradle.api.tasks.Input;
 import org.gradle.internal.authentication.DefaultBasicAuthentication;
 import org.gradle.plugin.management.PluginManagementSpec;
 import org.slf4j.Logger;
@@ -54,11 +55,13 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
       this.password = password;
     }
 
+    @Input
     @Override
     public String getUsername() {
       return username;
     }
 
+    @Input
     @Override
     public String getPassword() {
       return password;
