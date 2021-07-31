@@ -32,6 +32,7 @@ import org.gradle.api.artifacts.repositories.ArtifactRepository;
 import org.gradle.api.artifacts.repositories.PasswordCredentials;
 import org.gradle.api.credentials.Credentials;
 import org.gradle.api.initialization.Settings;
+import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.provider.Property;
@@ -105,6 +106,7 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
   // The plugin for Gradle will apply CBA repo settings inside settings.gradle and build.gradle.
   private void applyGradle(Gradle gradle, ArtifactRegistryPasswordCredentials crd) {
     gradle.settingsEvaluated(s -> modifySettings(s, crd));
+    gradle.projectsLoaded(g -> g.allprojects(p -> modifyProjectBuildscript(p, crd)));
     gradle.projectsEvaluated(g -> g.allprojects(p -> modifyProject(p, crd)));
   }
 
@@ -123,6 +125,15 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
     final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
     if (publishingExtension != null) {
       publishingExtension.getRepositories().forEach(r -> configureArtifactRegistryRepository(r, crd));
+    }
+  }
+
+  // Not sure this knows which repositories already exist, so register a callback to modify the repos
+  // as they are added to the buildscript
+  private void modifyProjectBuildscript(Project p, ArtifactRegistryPasswordCredentials crd) {
+    final ScriptHandler buildscript = p.getBuildscript();
+    if (buildscript != null) {
+      buildscript.getRepositories().whenObjectAdded(r -> configureArtifactRegistryRepository(r, crd));
     }
   }
 
