@@ -16,7 +16,6 @@
 
 package com.google.cloud.artifactregistry.wagon;
 
-
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpContent;
 import com.google.api.client.http.HttpRequest;
@@ -74,11 +73,10 @@ public final class ArtifactRegistryWagon extends AbstractWagon {
 
   @Override
   protected void openConnectionInternal() throws ConnectionException, AuthenticationException {
-    HttpRequestInitializer requestInitializer;
     HttpTransport httpTransport = httpTransportFactory.create();
     try {
       credentials = credentialProvider.getCredential();
-      requestInitializer = new HttpCredentialsAdapter(credentials);
+      HttpRequestInitializer requestInitializer = new ArtifactRegistryRequestInitializer(credentials, this.getReadTimeout());
       requestFactory = httpTransport.createRequestFactory(requestInitializer);
       hasCredentials = true;
     } catch (IOException e) {
