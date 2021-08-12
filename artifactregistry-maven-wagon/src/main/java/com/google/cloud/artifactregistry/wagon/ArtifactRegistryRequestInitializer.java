@@ -27,8 +27,8 @@ import java.io.IOException;
  */
 public class ArtifactRegistryRequestInitializer implements HttpRequestInitializer {
 
-  private HttpCredentialsAdapter credentialsAdapter;
-  private int readTimeout;
+  private final HttpCredentialsAdapter credentialsAdapter;
+  private final int readTimeout;
 
   ArtifactRegistryRequestInitializer(Credentials credentials, int readTimeout) {
     this.credentialsAdapter = new HttpCredentialsAdapter(credentials);
