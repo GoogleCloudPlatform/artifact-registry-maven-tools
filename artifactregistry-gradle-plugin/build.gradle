@@ -5,7 +5,7 @@ plugins {
 
 dependencies {
 	compile gradleApi()
-	compile group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version: '0.16.2'
+	compile group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version: '1.0.0'
 }
 
 pluginBundle {
