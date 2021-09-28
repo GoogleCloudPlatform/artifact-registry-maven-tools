@@ -91,7 +91,8 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
       String token = accessToken.getTokenValue();
       crd = new ArtifactRegistryPasswordCredentials("oauth2accesstoken", token);
     } catch (IOException e) {
-      throw new UncheckedIOException("Failed to get access token from gcloud or Application Default Credentials", e);
+      logger.info("Failed to get access token from gcloud or Application Default Credentials", e);
+      return;
     }
 
     if (o instanceof Project) {
