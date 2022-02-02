@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.net.URI;
 import java.net.URISyntaxException;
+import javax.annotation.Nullable;
 import org.gradle.api.Plugin;
 import org.gradle.api.Project;
 import org.gradle.api.ProjectConfigurationException;
@@ -83,7 +84,7 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
 
   @Override
   public void apply(Object o) {
-    ArtifactRegistryPasswordCredentials crd;
+    ArtifactRegistryPasswordCredentials crd = null;
     try {
       GoogleCredentials credentials = (GoogleCredentials)credentialProvider.getCredential();
       credentials.refreshIfExpired();
@@ -92,7 +93,6 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
       crd = new ArtifactRegistryPasswordCredentials("oauth2accesstoken", token);
     } catch (IOException e) {
       logger.info("Failed to get access token from gcloud or Application Default Credentials", e);
-      return;
     }
 
     if (o instanceof Project) {
@@ -104,24 +104,24 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
     }
   }
 
-  // The plugin for Gradle will apply CBA repo settings inside settings.gradle and build.gradle.
-  private void applyGradle(Gradle gradle, ArtifactRegistryPasswordCredentials crd) {
+  // The plugin for Gradle will apply Artifact Registry repo settings inside settings.gradle and build.gradle.
+  private void applyGradle(Gradle gradle, @Nullable ArtifactRegistryPasswordCredentials crd) {
     gradle.settingsEvaluated(s -> modifySettings(s, crd));
     gradle.projectsLoaded(g -> g.allprojects(p -> modifyProjectBuildscript(p, crd)));
     gradle.projectsEvaluated(g -> g.allprojects(p -> modifyProject(p, crd)));
   }
 
-  // The plugin for settings will apply CBA repo settings inside settings.gradle and build.gradle.
-  private void applySettings(Settings settings, ArtifactRegistryPasswordCredentials crd) {
+  // The plugin for settings will apply Artifact Registry repo settings inside settings.gradle and build.gradle.
+  private void applySettings(Settings settings, @Nullable ArtifactRegistryPasswordCredentials crd) {
     applyGradle(settings.getGradle(), crd);
   }
 
-  // The plugin for projects will only apply CBA repo settings inside build.gradle.
-  private void applyProject(Project project, ArtifactRegistryPasswordCredentials crd) {
+  // The plugin for projects will only apply Artifact Registry repo settings inside build.gradle.
+  private void applyProject(Project project, @Nullable ArtifactRegistryPasswordCredentials crd) {
     project.afterEvaluate(p -> modifyProject(p, crd));
   }
 
-  private void modifyProject(Project p, ArtifactRegistryPasswordCredentials crd) {
+  private void modifyProject(Project p, @Nullable ArtifactRegistryPasswordCredentials crd) {
     p.getRepositories().forEach(r -> configureArtifactRegistryRepository(r, crd));
     final PublishingExtension publishingExtension = p.getExtensions().findByType(PublishingExtension.class);
     if (publishingExtension != null) {
@@ -131,21 +131,22 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
 
   // Not sure this knows which repositories already exist, so register a callback to modify the repos
   // as they are added to the buildscript
-  private void modifyProjectBuildscript(Project p, ArtifactRegistryPasswordCredentials crd) {
+  private void modifyProjectBuildscript(Project p, @Nullable ArtifactRegistryPasswordCredentials crd) {
     final ScriptHandler buildscript = p.getBuildscript();
     if (buildscript != null) {
       buildscript.getRepositories().whenObjectAdded(r -> configureArtifactRegistryRepository(r, crd));
     }
   }
 
-  private void modifySettings(Settings s, ArtifactRegistryPasswordCredentials crd) {
+  private void modifySettings(Settings s, @Nullable ArtifactRegistryPasswordCredentials crd) {
     final PluginManagementSpec pluginManagement = s.getPluginManagement();
     if (pluginManagement != null) {
       pluginManagement.getRepositories().forEach(r -> configureArtifactRegistryRepository(r, crd));
     }
   }
 
-  private void configureArtifactRegistryRepository(ArtifactRepository repo, ArtifactRegistryPasswordCredentials crd)
+  private void configureArtifactRegistryRepository(
+      ArtifactRepository repo, @Nullable ArtifactRegistryPasswordCredentials crd)
       throws ProjectConfigurationException, UncheckedIOException {
     if (!(repo instanceof DefaultMavenArtifactRepository)) {
       return;
@@ -160,7 +161,7 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
             String.format("Invalid repository URL %s", u.toString()), e);
       }
 
-      if (shouldStoreCredentials(cbaRepo)) {
+      if (crd != null && shouldStoreCredentials(cbaRepo)) {
         cbaRepo.setConfiguredCredentials(crd);
         cbaRepo.authentication(authenticationContainer -> authenticationContainer
             .add(new DefaultBasicAuthentication("basic")));
