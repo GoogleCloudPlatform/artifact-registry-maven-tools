@@ -151,19 +151,19 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
     if (!(repo instanceof DefaultMavenArtifactRepository)) {
       return;
     }
-    final DefaultMavenArtifactRepository cbaRepo = (DefaultMavenArtifactRepository) repo;
-    final URI u = cbaRepo.getUrl();
+    final DefaultMavenArtifactRepository arRepo = (DefaultMavenArtifactRepository) repo;
+    final URI u = arRepo.getUrl();
     if (u != null && u.getScheme() != null && u.getScheme().equals("artifactregistry")) {
       try {
-        cbaRepo.setUrl(new URI("https", u.getHost(), u.getPath(), u.getFragment()));
+        arRepo.setUrl(new URI("https", u.getHost(), u.getPath(), u.getFragment()));
       } catch (URISyntaxException e) {
         throw new ProjectConfigurationException(
             String.format("Invalid repository URL %s", u.toString()), e);
       }
 
-      if (crd != null && shouldStoreCredentials(cbaRepo)) {
-        cbaRepo.setConfiguredCredentials(crd);
-        cbaRepo.authentication(authenticationContainer -> authenticationContainer
+      if (crd != null && shouldStoreCredentials(arRepo)) {
+        arRepo.setConfiguredCredentials(crd);
+        arRepo.authentication(authenticationContainer -> authenticationContainer
             .add(new DefaultBasicAuthentication("basic")));
       }
     }
