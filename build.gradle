@@ -36,6 +36,18 @@ allprojects {
     repositories {
         jcenter()
     }
+
+    task ensureNoGuavaAndroid {
+        doLast {
+            configurations.runtimeClasspath.resolvedConfiguration.resolvedArtifacts.each { artifact ->
+                def dependency = artifact.moduleVersion.id
+                if (dependency.name == "guava" && dependency.version.contains("android")) {
+                    throw new GradleException("unexpected guava android in " + project + ", found '" + dependency +"'");
+                }
+            }
+        }
+    }
+    compileJava.dependsOn ensureNoGuavaAndroid
 }
 
 subprojects {
