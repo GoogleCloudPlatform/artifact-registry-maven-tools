@@ -26,24 +26,27 @@ import java.io.InputStreamReader;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Date;
 import java.util.Map;
 import java.util.TimeZone;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class GcloudCredentials extends GoogleCredentials {
+  private static final Logger LOGGER = LoggerFactory.getLogger(GcloudCredentialsProvider.class.getName());
 
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   private static final String KEY_ACCESS_TOKEN = "access_token";
   private static final String KEY_TOKEN_EXPIRY = "token_expiry";
 
-  private GcloudCredentials(AccessToken initialToken) {
+
+  public GcloudCredentials(AccessToken initialToken) {
     super(initialToken);
   }
 
-  @Override
-  public AccessToken refreshAccessToken() throws IOException {
-    return getGcloudAccessToken();
-  }
+
 
   /**
    * Tries to get credentials from gcloud. Returns null if credentials are not available.
@@ -51,16 +54,32 @@ public class GcloudCredentials extends GoogleCredentials {
    * @throws IOException if there was an error retrieving credentials from gcloud
    */
   public static GcloudCredentials tryCreateGcloudCredentials() throws IOException {
-    try {
-      return new GcloudCredentials(getGcloudAccessToken());
-    } catch (IOException e) {
-      throw new IOException("Failed to get access token from gcloud: " + e.getMessage());
-    }
+    return new GcloudCredentials(validateAccessToken(getGcloudAccessToken()));
   }
 
   private static String gCloudCommand() {
     boolean isWindows = System.getProperty("os.name").startsWith("Windows");
     return isWindows ? "gcloud.cmd" : "gcloud";
+  }
+
+  // This is called if the token expires, from the calls to refreshIfExpired()
+  @Override
+  public AccessToken refreshAccessToken() throws IOException {
+    LOGGER.info("Refreshing gcloud credentials...");
+    return validateAccessToken(getGcloudAccessToken());
+  }
+
+  // Checks that the token is valid, throws IOException if it is expired.
+  // If this plugin is run when gcloud has expired auth, then it gcloud doesn't
+  // throw any errors, it simply returns an expired token. We check the token
+  // that is returned and throw an error if it's expired to prompt the user to
+  // login.
+  private static AccessToken validateAccessToken(AccessToken token) throws IOException {
+      Date expiry = token.getExpirationTime();
+      if (expiry.before(new Date())) {
+        throw new IOException("AccessToken is expired - maybe run `gcloud auth login`");
+      }
+      return token;
   }
 
   private static AccessToken getGcloudAccessToken() throws IOException {
