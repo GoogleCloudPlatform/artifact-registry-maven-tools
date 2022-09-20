@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class GcloudCredentials extends GoogleCredentials {
-  private static final Logger LOGGER = LoggerFactory.getLogger(GcloudCredentialsProvider.class.getName());
+  private static final Logger LOGGER = LoggerFactory.getLogger(GcloudCredentials.class.getName());
 
   private static final JsonFactory JSON_FACTORY = JacksonFactory.getDefaultInstance();
   private static final String KEY_ACCESS_TOKEN = "access_token";
