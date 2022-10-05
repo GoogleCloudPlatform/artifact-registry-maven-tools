@@ -26,7 +26,7 @@ import org.slf4j.LoggerFactory;
 
 // DefaultCredentialProvider fetches credentials from gcloud and falls back to Application Default
 // Credentials if that fails.
-public class DefaultCredentialProvider implements CredentialProvider {
+public final class DefaultCredentialProvider implements CredentialProvider {
   private static final Logger LOGGER = LoggerFactory.getLogger(GcloudCredentials.class.getName());
 
   private static String[] SCOPES = {"https://www.googleapis.com/auth/cloud-platform",
@@ -35,7 +35,7 @@ public class DefaultCredentialProvider implements CredentialProvider {
   private GoogleCredentials cachedCredentials;
 
   // Singleton instance
-  private static DefaultCredentialProvider defaultInstance = new DefaultCredentialProvider();
+  private final static DefaultCredentialProvider defaultInstance = new DefaultCredentialProvider();
   public static DefaultCredentialProvider getInstance() {
     return defaultInstance;
   }
