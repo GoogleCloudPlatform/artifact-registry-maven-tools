@@ -80,7 +80,7 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
     }
   }
 
-  private final CredentialProvider credentialProvider = new DefaultCredentialProvider();
+  private final CredentialProvider credentialProvider = DefaultCredentialProvider.getInstance();
 
   @Override
   public void apply(Object o) {

@@ -52,7 +52,7 @@ public final class ArtifactRegistryWagon extends AbstractWagon {
   private HttpRequestFactory requestFactory;
   private boolean hasCredentials;
   private HttpTransportFactory httpTransportFactory = NetHttpTransport::new;
-  private CredentialProvider credentialProvider = new DefaultCredentialProvider();
+  private CredentialProvider credentialProvider = DefaultCredentialProvider.getInstance();
   private Credentials credentials;
 
   private InputStream getInputStream(Resource resource)
