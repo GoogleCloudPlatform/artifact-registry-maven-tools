@@ -126,7 +126,15 @@ publishing {
     repositories {
         mavenLocal()
         maven {
-            url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            if(project.version.endsWith('-SNAPSHOT')) {
+                url "https://us-west1-maven.pkg.dev/lindsaysmith-convoy-playground/mvn-snapshots"
+                credentials {
+                    username "oauth2accesstoken"
+                    password System.getenv('AUTH_TOKEN')
+                }
+            } else {
+                url "https://oss.sonatype.org/service/local/staging/deploy/maven2"
+            }
             if (rootProject.hasProperty("ossrhUsername") && rootProject.hasProperty("ossrhPassword")) {
                 credentials {
                     username ossrhUsername
