@@ -11,5 +11,4 @@ dependencies {
     testImplementation group: 'org.apache.maven.wagon', name: 'wagon-provider-test', version: '3.3.3'
     testImplementation group: 'junit', name: 'junit', version: '4.12'
     compileOnly group: 'org.apache.maven.wagon', name: 'wagon-provider-api', version: '3.3.3'
-    testImplementation("com.google.guava:guava:31.1-jre")
 }
