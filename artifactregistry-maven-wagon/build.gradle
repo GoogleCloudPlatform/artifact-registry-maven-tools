@@ -4,8 +4,15 @@ dependencies {
     implementation('com.google.http-client:google-http-client:1.39.2')
     implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version:'1.0.0'
 
+    // Exclude stuff that we don't need that bring in a ton of transitive deps.
     configurations.implementation {
-        exclude group: 'com.google.guava', module: 'guava'
+        exclude group: 'com.google.guava', module:'failureaccess'
+        exclude group: 'com.google.guava', module:'listenablefuture'
+        exclude group: 'org.checkerframework', module:'checker-compat-qual'
+        exclude group: 'org.checkerframework', module:'checker-qual'
+        exclude group: 'com.google.code.findbugs', module: 'jsr305'
+        exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+        exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
     }
 
     testImplementation group: 'org.apache.maven.wagon', name: 'wagon-provider-test', version: '3.3.3'
