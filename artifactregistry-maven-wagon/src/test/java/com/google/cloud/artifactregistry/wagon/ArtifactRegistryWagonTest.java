@@ -26,9 +26,10 @@ import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.cloud.artifactregistry.auth.CredentialProvider;
-import com.google.common.io.Files;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.time.Instant;
 import java.util.Date;
 import org.apache.maven.wagon.FileTestUtils;
@@ -123,7 +124,9 @@ public class ArtifactRegistryWagonTest {
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
     File f = FileTestUtils.createUniqueFile("my/artifact/dir", "test");
-    Files.asCharSink(f, Charset.defaultCharset()).write("test content");
+    //Files.asCharSink(f, Charset.defaultCharset()).write("test content");
+    writeStringToFile(f, "test content");
+
     wagon.put(f, "my/resource");
     String authHeader = transport.getLowLevelHttpRequest().getFirstHeaderValue("Authorization");
     Assert.assertEquals("Bearer test-access-token", authHeader);
@@ -141,7 +144,8 @@ public class ArtifactRegistryWagonTest {
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
     File f = FileTestUtils.createUniqueFile("my/artifact/dir", "test");
-    Files.asCharSink(f, Charset.defaultCharset()).write("test content");
+    writeStringToFile(f, "test content");
+    //Files.asCharSink(f, Charset.defaultCharset()).write("test content");
     expectedException.expect(AuthorizationException.class);
     expectedException.expectMessage(CoreMatchers
         .containsString("Permission denied on remote repository (or it may not exist)"));
@@ -189,7 +193,9 @@ public class ArtifactRegistryWagonTest {
   }
 
   private void assertFileContains(File f, String wantContent) throws IOException {
-    String content = Files.asCharSource(f, Charset.defaultCharset()).read();
+    String content = readStringFromFile(f);
+
+    //Files.asCharSource(f, Charset.defaultCharset()).read();
     Assert.assertEquals(wantContent, content);
   }
 
@@ -224,6 +230,17 @@ public class ArtifactRegistryWagonTest {
     public Credentials getCredential() throws IOException {
       throw exception;
     }
+  }
+
+  private void writeStringToFile(File f, CharSequence content) throws IOException {
+    FileWriter out = new FileWriter(f);
+    out.append("test content");
+    out.close();
+  }
+
+  private String readStringFromFile(File f) throws IOException {
+    byte[] encoded = Files.readAllBytes(f.toPath());
+    return new String(encoded, Charset.defaultCharset());
   }
 
 }
