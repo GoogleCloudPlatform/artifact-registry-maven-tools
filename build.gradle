@@ -20,7 +20,7 @@ plugins {
 }
 
 description = 'Artifact Registry Maven Tools'
-ext.project_version = '2.2.1'
+ext.project_version = '2.2.2-SNAPSHOT'
 ext.isReleaseVersion = !project_version.endsWith("SNAPSHOT")
 
 allprojects {
