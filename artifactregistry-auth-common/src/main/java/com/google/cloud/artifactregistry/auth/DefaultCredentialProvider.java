@@ -41,7 +41,7 @@ public final class DefaultCredentialProvider implements CredentialProvider {
   }
 
   public static long LAST_REFRESH_TIME_MS = 0;
-  public static final long REFESH_INTERVAL_MS = Duration.ofSeconds(10).toMillis();
+  public static final long REFRESH_INTERVAL_MS = Duration.ofSeconds(10).toMillis();
 
   // Private constructor so that they must use the singleton.
   private DefaultCredentialProvider(){}
@@ -59,7 +59,7 @@ public final class DefaultCredentialProvider implements CredentialProvider {
 
   public void refreshIfNeeded() throws IOException {
     long now = Instant.now().toEpochMilli();
-    if (cachedCredentials != null && now > LAST_REFRESH_TIME_MS + REFESH_INTERVAL_MS) {
+    if (cachedCredentials != null && now > LAST_REFRESH_TIME_MS + REFRESH_INTERVAL_MS) {
       LOGGER.info("Refreshing Credentials...");
       cachedCredentials.refreshIfExpired();
       LAST_REFRESH_TIME_MS = now;
