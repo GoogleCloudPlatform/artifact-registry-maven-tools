@@ -53,6 +53,12 @@ Where
 * **PROJECT_ID** is the ID of the project.
 * **REPOSITORY_ID** is the ID of the repository.
 
+### Parent Pom Usage
+
+To use a parent pom definition hosted at an Artifact Registry repository, some extra configuration is needed.
+These can be found
+at [Authenticating with a credential helper, step 6](https://cloud.google.com/artifact-registry/docs/java/authentication#auth-helper)
+
 ## Gradle Setup
 
 To use Artifact Registry repositories with gradle, add the following configuration to the
