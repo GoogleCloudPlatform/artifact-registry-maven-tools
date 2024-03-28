@@ -75,7 +75,7 @@ public final class ArtifactRegistryWagon extends AbstractWagon {
   protected void openConnectionInternal() throws ConnectionException, AuthenticationException {
     HttpTransport httpTransport = httpTransportFactory.create();
     try {
-      credentials = credentialProvider.getCredential();
+      credentials = credentialProvider.getCredential(new ProcessBuilderCommandExecutor());
       HttpRequestInitializer requestInitializer = new ArtifactRegistryRequestInitializer(credentials, this.getReadTimeout());
       requestFactory = httpTransport.createRequestFactory(requestInitializer);
       hasCredentials = true;
