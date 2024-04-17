@@ -2,7 +2,7 @@ dependencies {
     implementation group: 'org.apache.maven.wagon', name: 'wagon-http-shared', version: '3.3.3'
     implementation group: 'org.apache.maven', name: 'maven-plugin-api', version: '3.6.1'
     implementation('com.google.http-client:google-http-client:1.43.2')
-    implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version:'1.0.0'
+    implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version:'1.23.0'
 
     // Exclude stuff that we don't need that bring in a ton of transitive deps.
     configurations.implementation {
