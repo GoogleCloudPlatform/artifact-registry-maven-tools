@@ -25,7 +25,7 @@ ext.isReleaseVersion = !project_version.endsWith("SNAPSHOT")
 
 allprojects {
     apply plugin: 'java'
-    apply plugin: 'maven'
+    apply plugin: 'maven-publish'
     group = 'com.google.cloud.artifactregistry'
     version = project_version
     sourceCompatibility = 1.8
@@ -34,7 +34,7 @@ allprojects {
         options.encoding = 'UTF-8'
     }
     repositories {
-        jcenter()
+        mavenCentral()
     }
 
     task ensureNoGuavaAndroid {
@@ -143,13 +143,13 @@ signing {
 
 project(":artifactregistry-maven-wagon") {
     dependencies {
-        compile project(":artifactregistry-auth-common")
+        implementation(project(":artifactregistry-auth-common"))
     }
 }
 
 project(":artifactregistry-gradle-plugin") {
     dependencies {
-        compile project(":artifactregistry-auth-common")
+        implementation(project(":artifactregistry-auth-common"))
     }
 }
 
