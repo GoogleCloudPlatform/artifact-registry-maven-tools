@@ -25,6 +25,7 @@ import com.google.api.client.testing.http.MockLowLevelHttpResponse;
 import com.google.auth.Credentials;
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.artifactregistry.auth.CommandExecutor;
 import com.google.cloud.artifactregistry.auth.CredentialProvider;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -101,7 +102,7 @@ public class ArtifactRegistryWagonTest {
         .setLowLevelHttpResponse(new MockLowLevelHttpResponse().setContent("test content"))
         .build();
     ArtifactRegistryWagon wagon = new ArtifactRegistryWagon();
-    wagon.setCredentialProvider(() -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
+    wagon.setCredentialProvider((commandExecutor) -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
         Instant.now().plusSeconds(1000)))));
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
@@ -119,7 +120,7 @@ public class ArtifactRegistryWagonTest {
     MockHttpTransport transport = new MockHttpTransport.Builder()
         .setLowLevelHttpResponse(new MockLowLevelHttpResponse()).build();
     ArtifactRegistryWagon wagon = new ArtifactRegistryWagon();
-    wagon.setCredentialProvider(() -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
+    wagon.setCredentialProvider((commandExecutor) -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
         Instant.now().plusSeconds(1000)))));
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
@@ -174,7 +175,7 @@ public class ArtifactRegistryWagonTest {
         .setLowLevelHttpResponse(new MockLowLevelHttpResponse().setStatusCode(HttpStatusCodes.STATUS_CODE_OK))
         .build();
     ArtifactRegistryWagon wagon = new ArtifactRegistryWagon();
-    wagon.setCredentialProvider(() -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
+    wagon.setCredentialProvider((commandExecutor) -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
         Instant.now().plusSeconds(1000)))));
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
@@ -185,7 +186,7 @@ public class ArtifactRegistryWagonTest {
   public void testHeadNotFound() throws Exception {
     MockHttpTransport transport = failingTransportWithStatus(HttpStatusCodes.STATUS_CODE_NOT_FOUND);
     ArtifactRegistryWagon wagon = new ArtifactRegistryWagon();
-    wagon.setCredentialProvider(() -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
+    wagon.setCredentialProvider((commandExecutor) -> GoogleCredentials.create(new AccessToken("test-access-token", Date.from(
         Instant.now().plusSeconds(1000)))));
     wagon.setHttpTransportFactory(() -> transport);
     wagon.connect(new Repository("my-repo", REPO_URL));
@@ -227,7 +228,7 @@ public class ArtifactRegistryWagonTest {
     }
 
     @Override
-    public Credentials getCredential() throws IOException {
+    public Credentials getCredential(CommandExecutor commandExecutor) throws IOException {
       throw exception;
     }
   }

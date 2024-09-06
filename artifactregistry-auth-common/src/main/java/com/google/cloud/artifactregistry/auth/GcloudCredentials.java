@@ -41,20 +41,24 @@ public class GcloudCredentials extends GoogleCredentials {
   private static final String KEY_ACCESS_TOKEN = "access_token";
   private static final String KEY_TOKEN_EXPIRY = "token_expiry";
 
+  private final CommandExecutor commandExecutor;
 
-  public GcloudCredentials(AccessToken initialToken) {
+
+  public GcloudCredentials(
+          AccessToken initialToken,
+          CommandExecutor commandExecutor
+  ) {
     super(initialToken);
+    this.commandExecutor = commandExecutor;
   }
-
-
 
   /**
    * Tries to get credentials from gcloud. Returns null if credentials are not available.
    * @return The Credentials from gcloud
    * @throws IOException if there was an error retrieving credentials from gcloud
    */
-  public static GcloudCredentials tryCreateGcloudCredentials() throws IOException {
-    return new GcloudCredentials(validateAccessToken(getGcloudAccessToken()));
+  public static GcloudCredentials tryCreateGcloudCredentials(CommandExecutor commandExecutor) throws IOException {
+    return new GcloudCredentials(validateAccessToken(getGcloudAccessToken(commandExecutor)), commandExecutor);
   }
 
   private static String gCloudCommand() {
@@ -66,7 +70,7 @@ public class GcloudCredentials extends GoogleCredentials {
   @Override
   public AccessToken refreshAccessToken() throws IOException {
     LOGGER.info("Refreshing gcloud credentials...");
-    return validateAccessToken(getGcloudAccessToken());
+    return validateAccessToken(getGcloudAccessToken(this.commandExecutor));
   }
 
   // Checks that the token is valid, throws IOException if it is expired.
@@ -82,16 +86,15 @@ public class GcloudCredentials extends GoogleCredentials {
       return token;
   }
 
-  private static AccessToken getGcloudAccessToken() throws IOException {
-    ProcessBuilder processBuilder = new ProcessBuilder();
-    String gcloud = gCloudCommand();
-    processBuilder.command(gcloud, "config", "config-helper", "--format=json(credential)");
-    Process process = processBuilder.start();
+  private static AccessToken getGcloudAccessToken(CommandExecutor commandExecutor) throws IOException {
     try {
-      int exitCode = process.waitFor();
-      String stdOut = readStreamToString(process.getInputStream());
+      String gcloud = gCloudCommand();
+      CommandExecutorResult commandExecutorResult = commandExecutor.executeCommand(gcloud, "config", "config-helper", "--format=json(credential)");
+      int exitCode = commandExecutorResult.exitCode;
+      String stdOut = commandExecutorResult.stdOut;
+
       if (exitCode != 0) {
-        String stdErr = readStreamToString(process.getErrorStream());
+        String stdErr = commandExecutorResult.stdErr;
         throw new IOException(String.format("gcloud exited with status: %d\nOutput:\n%s\nError Output:\n%s\n",
             exitCode, stdOut, stdErr));
       }
@@ -108,24 +111,8 @@ public class GcloudCredentials extends GoogleCredentials {
       df.setTimeZone(TimeZone.getTimeZone("UTC"));
       Date expiry = df.parse((String) credential.get(KEY_TOKEN_EXPIRY));
       return new AccessToken((String) credential.get(KEY_ACCESS_TOKEN), expiry);
-    } catch (InterruptedException e) {
-      Thread.currentThread().interrupt();
-      throw new IOException(e);
     } catch (ParseException e) {
       throw new IOException("Failed to parse timestamp from gcloud output", e);
     }
-  }
-
-  // Reads a stream to a string, this code is basically copied from 'copyReaderToBuilder' from
-  // com.google.io.CharStreams in the Guava library.
-  private static String readStreamToString(InputStream input) throws IOException {
-    InputStreamReader reader = new InputStreamReader(input);
-    StringBuilder output = new StringBuilder();
-    char[] buf = new char[0x800];
-    int nRead;
-    while ((nRead = reader.read(buf)) != -1) {
-      output.append(buf, 0, nRead);
-    }
-    return output.toString();
   }
 }

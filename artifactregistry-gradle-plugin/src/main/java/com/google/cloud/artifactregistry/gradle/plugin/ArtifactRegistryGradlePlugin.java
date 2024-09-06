@@ -18,6 +18,7 @@ package com.google.cloud.artifactregistry.gradle.plugin;
 
 import com.google.auth.oauth2.AccessToken;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.google.cloud.artifactregistry.auth.CommandExecutor;
 import com.google.cloud.artifactregistry.auth.CredentialProvider;
 import com.google.cloud.artifactregistry.auth.DefaultCredentialProvider;
 import java.io.IOException;
@@ -37,6 +38,7 @@ import org.gradle.api.initialization.dsl.ScriptHandler;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.provider.Property;
+import org.gradle.api.provider.ProviderFactory;
 import org.gradle.api.publish.PublishingExtension;
 import org.gradle.api.tasks.Input;
 import org.gradle.internal.authentication.DefaultBasicAuthentication;
@@ -51,10 +53,12 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
   static class ArtifactRegistryPasswordCredentials implements PasswordCredentials {
     private String username;
     private String password;
+    private final CommandExecutor commandExecutor;
 
-    ArtifactRegistryPasswordCredentials(String username, String password) {
+    ArtifactRegistryPasswordCredentials(String username, String password, CommandExecutor commandExecutor) {
       this.username = username;
       this.password = password;
+      this.commandExecutor = commandExecutor;
     }
 
     @Input
@@ -86,11 +90,24 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
   public void apply(Object o) {
     ArtifactRegistryPasswordCredentials crd = null;
     try {
-      GoogleCredentials credentials = (GoogleCredentials)credentialProvider.getCredential();
+      ProviderFactory providerFactory;
+      if (o instanceof Project) {
+        providerFactory = ((Project) o).getProviders();
+      } else if (o instanceof Gradle) {
+        providerFactory = ((Gradle) o).getRootProject().getProviders();
+      } else if (o instanceof Settings) {
+        providerFactory = ((Settings) o).getProviders();
+      } else {
+        logger.info("Failed to get access token from gcloud or Application Default Credentials due to unknown script type " + o);
+        return;
+      }
+      CommandExecutor commandExecutor = new ProviderFactoryCommandExecutor(providerFactory);
+
+      GoogleCredentials credentials = (GoogleCredentials)credentialProvider.getCredential(commandExecutor);
       credentials.refreshIfExpired();
       AccessToken accessToken = credentials.getAccessToken();
       String token = accessToken.getTokenValue();
-      crd = new ArtifactRegistryPasswordCredentials("oauth2accesstoken", token);
+      crd = new ArtifactRegistryPasswordCredentials("oauth2accesstoken", token, commandExecutor);
     } catch (IOException e) {
       logger.info("Failed to get access token from gcloud or Application Default Credentials", e);
     }
