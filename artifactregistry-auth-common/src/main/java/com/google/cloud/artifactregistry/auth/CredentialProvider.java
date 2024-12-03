@@ -23,5 +23,5 @@ import java.io.IOException;
 @FunctionalInterface
 public interface CredentialProvider {
 
-  Credentials getCredential() throws IOException;
+  Credentials getCredential(CommandExecutor commandExecutor) throws IOException;
 }
