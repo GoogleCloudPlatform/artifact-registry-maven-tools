@@ -46,11 +46,11 @@ public final class DefaultCredentialProvider implements CredentialProvider {
   // Private constructor so that they must use the singleton.
   private DefaultCredentialProvider(){}
 
-  public Credentials getCredential() throws IOException {
+  public Credentials getCredential(CommandExecutor commandExecutor) throws IOException {
     synchronized (this) {
       if (cachedCredentials == null) {
         LOGGER.info("Initializing Credentials...");
-        cachedCredentials = makeGoogleCredentials();
+        cachedCredentials = makeGoogleCredentials(commandExecutor);
       }
       refreshIfNeeded();
       return cachedCredentials;
@@ -66,7 +66,7 @@ public final class DefaultCredentialProvider implements CredentialProvider {
     }
   }
 
-  public GoogleCredentials makeGoogleCredentials() throws IOException {
+  public GoogleCredentials makeGoogleCredentials(CommandExecutor commandExecutor) throws IOException {
     LOGGER.debug("ArtifactRegistry: Retrieving credentials...");
     GoogleCredentials credentials;
 
@@ -82,7 +82,7 @@ public final class DefaultCredentialProvider implements CredentialProvider {
 
     LOGGER.debug("Trying gcloud credentials...");
     try {
-      credentials = GcloudCredentials.tryCreateGcloudCredentials();
+      credentials = GcloudCredentials.tryCreateGcloudCredentials(commandExecutor);
       LOGGER.info("Using credentials retrieved from gcloud.");
       return credentials;
     } catch (IOException ex) {
