@@ -5,7 +5,7 @@ dependencies {
     implementation group: 'org.slf4j', name: 'slf4j-api', version:'1.7.30'
 
     // override any guava:*-android dependency with jre dependency
-    implementation group: 'com.google.guava', name: 'guava', version:'33.2.1-jre'
+    implementation group: 'com.google.guava', name: 'guava', version:'33.4.0-jre'
 
     // Exclude stuff that we don't need that bring in a ton of transitive deps.
     configurations.implementation {
