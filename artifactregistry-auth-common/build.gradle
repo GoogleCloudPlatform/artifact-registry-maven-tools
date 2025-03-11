@@ -2,7 +2,7 @@ dependencies {
     implementation('com.google.http-client:google-http-client:1.44.2')
     implementation('com.google.http-client:google-http-client-jackson2:1.39.2')
     implementation('com.google.auth:google-auth-library-oauth2-http:1.24.1')
-    implementation group: 'org.slf4j', name: 'slf4j-api', version:'1.7.30'
+    implementation group: 'org.slf4j', name: 'slf4j-api', version:'2.0.17'
 
     // override any guava:*-android dependency with jre dependency
     implementation group: 'com.google.guava', name: 'guava', version:'33.4.0-jre'
