@@ -1,6 +1,6 @@
 plugins {
     id 'java-gradle-plugin'
-    id 'com.gradle.plugin-publish' version '0.21.0'
+    id 'com.gradle.plugin-publish' version '1.2.1'
 }
 
 dependencies {
@@ -17,7 +17,7 @@ gradlePlugin {
             displayName = 'Artifact Registry Gradle Plugin'
             description = 'A Gradle plugin used to connect to Artifact Registry Maven repositories.'
             tags.set(['artifactregistry', 'gcp'])
-	    implementationClass = 'com.google.cloud.artifactregistry.gradle.plugin.ArtifactRegistryGradlePlugin'
+            implementationClass = 'com.google.cloud.artifactregistry.gradle.plugin.ArtifactRegistryGradlePlugin'
         }
     }
 }
