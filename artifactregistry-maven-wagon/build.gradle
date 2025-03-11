@@ -2,7 +2,7 @@ dependencies {
     implementation group: 'org.apache.maven.wagon', name: 'wagon-http-shared', version: '3.5.3'
     implementation group: 'org.apache.maven', name: 'maven-plugin-api', version: '3.6.1'
     implementation('com.google.http-client:google-http-client:1.44.2')
-    implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version:'1.24.1'
+    implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version:'1.33.1'
 
     // override any guava:*-android dependency with jre dependency
     implementation group: 'com.google.guava', name: 'guava', version:'33.4.0-jre'
