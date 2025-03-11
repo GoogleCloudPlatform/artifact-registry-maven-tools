@@ -5,7 +5,7 @@ dependencies {
     implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version:'1.24.1'
 
     // override any guava:*-android dependency with jre dependency
-    implementation group: 'com.google.guava', name: 'guava', version:'33.2.1-jre'
+    implementation group: 'com.google.guava', name: 'guava', version:'33.4.0-jre'
 
     // Exclude stuff that we don't need that bring in a ton of transitive deps.
     configurations.implementation {
@@ -18,6 +18,6 @@ dependencies {
     }
 
     testImplementation group: 'org.apache.maven.wagon', name: 'wagon-provider-test', version: '3.3.3'
-    testImplementation group: 'junit', name: 'junit', version: '4.12'
+    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
     compileOnly group: 'org.apache.maven.wagon', name: 'wagon-provider-api', version: '3.3.3'
 }
