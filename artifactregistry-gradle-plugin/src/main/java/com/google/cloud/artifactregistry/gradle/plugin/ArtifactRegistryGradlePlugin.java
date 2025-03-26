@@ -35,6 +35,7 @@ import org.gradle.api.artifacts.repositories.PasswordCredentials;
 import org.gradle.api.credentials.Credentials;
 import org.gradle.api.initialization.Settings;
 import org.gradle.api.initialization.dsl.ScriptHandler;
+import org.gradle.api.initialization.resolve.DependencyResolutionManagement;
 import org.gradle.api.internal.artifacts.repositories.DefaultMavenArtifactRepository;
 import org.gradle.api.invocation.Gradle;
 import org.gradle.api.provider.Property;
@@ -156,10 +157,8 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
   }
 
   private void modifySettings(Settings s, @Nullable ArtifactRegistryPasswordCredentials crd) {
-    final PluginManagementSpec pluginManagement = s.getPluginManagement();
-    if (pluginManagement != null) {
-      pluginManagement.getRepositories().forEach(r -> configureArtifactRegistryRepository(r, crd));
-    }
+    s.getPluginManagement().getRepositories().forEach(r -> configureArtifactRegistryRepository(r, crd));
+    s.getDependencyResolutionManagement().getRepositories().forEach(r -> configureArtifactRegistryRepository(r, crd));
   }
 
   private void configureArtifactRegistryRepository(
