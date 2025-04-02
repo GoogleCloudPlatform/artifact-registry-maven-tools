@@ -24,7 +24,7 @@ To enable the wagon, add the following configuration to the `pom.xml` in your pr
         <extension>
             <groupId>com.google.cloud.artifactregistry</groupId>
             <artifactId>artifactregistry-maven-wagon</artifactId>
-            <version>2.2.1</version>
+            <version>2.2.4</version>
         </extension>
     </extensions>
 ```
@@ -67,7 +67,7 @@ you should use the correct location for your repository.
 
 ```gradle
 plugins {
-  id "com.google.cloud.artifactregistry.gradle-plugin" version "2.2.1"
+  id "com.google.cloud.artifactregistry.gradle-plugin" version "2.2.4"
 }
 
 repositories {
@@ -89,6 +89,40 @@ Where
 * **PROJECT_ID** is the ID of the project.
 * **REPOSITORY_ID** is the ID of the repository.
 
+### Using the Dependency Resolution Management block in settings.gradle
+
+The incubating but well supported [`dependenciesResolutionManagement` block](https://docs.gradle.org/current/userguide/centralizing_repositories.html) provides
+a way to declare dependency repositories in a single project-wide location, within the `settings.gradle` file.
+
+```gradle
+plugins {
+  id "com.google.cloud.artifactregistry.gradle-plugin" version "2.2.4"
+}
+
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            url 'artifactregistry://us-west1-maven.pkg.dev/PROJECT_ID/REPOSITORY_ID'
+        }
+    }
+}
+```
+
+For `settings.gradle.kts` (Kotlin script) files:
+```kotlin
+plugins {
+  id("com.google.cloud.artifactregistry.gradle-plugin").version("2.2.4")
+}
+
+dependencyResolutionManagement {
+    repositories {
+        maven {
+            url = uri("artifactregistry://us-west1-maven.pkg.dev/PROJECT_ID/REPOSITORY_ID")
+        }
+    }
+}
+```
+
 ### Alternatives
 
 If you need to use Artifact Registry repositories inside your `init.gradle` or `settings.gradle`, the plugin can also be used inside `init.gradle` or `settings.gradle` files.
@@ -103,7 +137,7 @@ initscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:2.2.1"
+    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:2.2.4"
   }
 }
 
@@ -120,7 +154,7 @@ buildscript {
     }
   }
   dependencies {
-    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:2.2.1"
+    classpath "gradle.plugin.com.google.cloud.artifactregistry:artifactregistry-gradle-plugin:2.2.4"
   }
 }
 
