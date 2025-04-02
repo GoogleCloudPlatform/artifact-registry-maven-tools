@@ -5,7 +5,7 @@ dependencies {
     implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version:'1.33.1'
 
     // override any guava:*-android dependency with jre dependency
-    implementation group: 'com.google.guava', name: 'guava', version:'33.4.0-jre'
+    implementation group: 'com.google.guava', name: 'guava', version:'33.4.6-jre'
 
     // Exclude stuff that we don't need that bring in a ton of transitive deps.
     configurations.implementation {
