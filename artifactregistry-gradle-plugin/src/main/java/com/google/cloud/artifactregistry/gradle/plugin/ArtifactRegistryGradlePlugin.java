@@ -85,41 +85,66 @@ public class ArtifactRegistryGradlePlugin implements Plugin<Object> {
     }
   }
 
-  private final CredentialProvider credentialProvider = DefaultCredentialProvider.getInstance();
+  private final CredentialProvider credentialProvider =
+      DefaultCredentialProvider.getInstance();
+  private ArtifactRegistryPasswordCredentials crd = null;
 
-  @Override
-  public void apply(Object o) {
-    ArtifactRegistryPasswordCredentials crd = null;
-    try {
-      ProviderFactory providerFactory;
-      if (o instanceof Project) {
-        providerFactory = ((Project) o).getProviders();
-      } else if (o instanceof Gradle) {
-        providerFactory = ((Gradle) o).getRootProject().getProviders();
-      } else if (o instanceof Settings) {
-        providerFactory = ((Settings) o).getProviders();
-      } else {
-        logger.info("Failed to get access token from gcloud or Application Default Credentials due to unknown script type " + o);
+    @Override
+    public void apply(Object o) {
+      logger.error("Using my local plugin");
+      try {
+        ProviderFactory providerFactory;
+        if (o instanceof Project) {
+          logger.error("Applying to project");
+          providerFactory = ((Project)o).getProviders();
+          crd = getArtifactRegistryPasswordCredentials(providerFactory, crd);
+          applyProject((Project)o, crd);
+        } else if (o instanceof Gradle) {
+          Gradle grdl = (Gradle)o;
+          try {
+            providerFactory = grdl.getRootProject().getProviders();
+            crd = getArtifactRegistryPasswordCredentials(providerFactory, crd);
+
+            logger.error("Applying to gradle");
+            applyGradle(grdl, crd);
+          } catch (IllegalStateException e) {
+            logger.error("Applying to settings during init: ");
+            grdl.beforeSettings(settings -> {
+              logger.error("Applying now to " +
+                           settings.getSettingsDir().toString());
+              settings.getPlugins().apply(ArtifactRegistryGradlePlugin.class);
+            });
+          }
+        } else if (o instanceof Settings) {
+          logger.error("Applying to settings");
+          providerFactory = ((Settings)o).getProviders();
+          crd = getArtifactRegistryPasswordCredentials(providerFactory, crd);
+          applySettings((Settings)o, crd);
+        }
+
+      } catch (IOException e) {
+        logger.info("Failed to get access token from gcloud or Application " +
+                    "Default Credentials",
+                    e);
         return;
       }
-      CommandExecutor commandExecutor = new ProviderFactoryCommandExecutor(providerFactory);
-
-      GoogleCredentials credentials = (GoogleCredentials)credentialProvider.getCredential(commandExecutor);
-      credentials.refreshIfExpired();
-      AccessToken accessToken = credentials.getAccessToken();
-      String token = accessToken.getTokenValue();
-      crd = new ArtifactRegistryPasswordCredentials("oauth2accesstoken", token, commandExecutor);
-    } catch (IOException e) {
-      logger.info("Failed to get access token from gcloud or Application Default Credentials", e);
     }
 
-    if (o instanceof Project) {
-      applyProject((Project) o, crd);
-    } else if (o instanceof Gradle) {
-      applyGradle((Gradle) o, crd);
-    } else if (o instanceof Settings) {
-      applySettings((Settings) o, crd);
-    }
+  private ArtifactRegistryPasswordCredentials
+  getArtifactRegistryPasswordCredentials(
+      ProviderFactory providerFactory, ArtifactRegistryPasswordCredentials crd)
+      throws IOException {
+    CommandExecutor commandExecutor =
+        new ProviderFactoryCommandExecutor(providerFactory);
+
+    GoogleCredentials credentials =
+        (GoogleCredentials)credentialProvider.getCredential(commandExecutor);
+    credentials.refreshIfExpired();
+    AccessToken accessToken = credentials.getAccessToken();
+    String token = accessToken.getTokenValue();
+    crd = new ArtifactRegistryPasswordCredentials("oauth2accesstoken", token,
+                                                  commandExecutor);
+    return crd;
   }
 
   // The plugin for Gradle will apply Artifact Registry repo settings inside settings.gradle and build.gradle.
