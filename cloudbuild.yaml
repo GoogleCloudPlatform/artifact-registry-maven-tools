@@ -1,4 +1,29 @@
+# This file is used to run tests on Google Cloud Build.
+#
+# The build is configured to run tests against multiple JDKs to ensure
+# compatibility. Each JDK version is run in a separate step, using a clean
+# OpenJDK image and the Gradle wrapper. This approach has two main benefits:
+#
+# 1.  It prevents the need to update this file when the Gradle version is
+#     updated in the project. The build will always use the version of Gradle
+#     defined in the `gradle/wrapper/gradle-wrapper.properties` file.
+# 2.  It more closely mirrors a typical developer environment, where the
+#     project's Gradle wrapper is used to build and test the code.
+#
 steps:
-  - name: "gradle:8.13.0-jdk8"
-    entrypoint: "gradle"
-    args: [test, --info]
+# Test against JDK 8
+- name: "eclipse-temurin:8-jdk"
+  entrypoint: "./gradlew"
+  args: ["test", "--info"]
+# Test against JDK 21
+- name: "eclipse-temurin:21-jdk"
+  entrypoint: "./gradlew"
+  args: ["test", "--info"]
+# Test against JDK 24
+- name: "eclipse-temurin:24-jdk"
+  entrypoint: "./gradlew"
+  args: ["test", "--info"]
+# Verify that a full local publish works
+- name: "eclipse-temurin:24-jdk"
+  entrypoint: "./gradlew"
+  args: ["publishToMavenLocal", "--info"]
