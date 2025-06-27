@@ -8,6 +8,15 @@
       "matchPackageNames": ["eclipse-temurin"],
       "matchCurrentVersion": "/^(8|21|24)-jdk$/",
       "enabled": false
+    },
+    {
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "pin",
+        "digest"
+      ],
+      "groupName": "all non-major dependency updates"
     }
   ]
 }
