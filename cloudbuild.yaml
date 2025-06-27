@@ -12,11 +12,11 @@
 #
 steps:
 # Test against JDK 8
-- name: "eclipse-temurin:8-jdk"
+- name: "eclipse-temurin:21.0.7_6-jdk"
   entrypoint: "./gradlew"
   args: ["test", "--info"]
 # Test against JDK 21
-- name: "eclipse-temurin:21-jdk"
+- name: "eclipse-temurin:21.0.7_6-jdk"
   entrypoint: "./gradlew"
   args: ["test", "--info"]
 # Test against JDK 24
