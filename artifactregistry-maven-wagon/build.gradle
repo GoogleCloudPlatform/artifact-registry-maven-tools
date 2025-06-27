@@ -1,3 +1,9 @@
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
 dependencies {
     implementation(libs.maven.wagon.http.shared)
     implementation(libs.maven.plugin.api)

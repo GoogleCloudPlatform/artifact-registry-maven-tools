@@ -1,3 +1,10 @@
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
 dependencies {
     implementation(libs.google.http.client)
     implementation(libs.google.http.client.jackson2)
