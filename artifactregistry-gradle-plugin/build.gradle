@@ -1,11 +1,11 @@
 plugins {
     id 'java-gradle-plugin'
-    id 'com.gradle.plugin-publish' version '1.3.1'
+    alias(libs.plugins.gradle.plugin.publish)
 }
 
 dependencies {
 	implementation gradleApi()
-	implementation group: 'com.google.auth', name: 'google-auth-library-oauth2-http', version: '1.33.1'
+	implementation(libs.google.auth.library.oauth2.http)
 }
 
 gradlePlugin {
@@ -21,4 +21,3 @@ gradlePlugin {
         }
     }
 }
-
