@@ -1,11 +1,11 @@
 dependencies {
-    implementation('com.google.http-client:google-http-client:1.46.3')
-    implementation('com.google.http-client:google-http-client-jackson2:1.46.3')
-    implementation('com.google.auth:google-auth-library-oauth2-http:1.33.1')
-    implementation group: 'org.slf4j', name: 'slf4j-api', version:'2.0.17'
+    implementation(libs.google.http.client)
+    implementation(libs.google.http.client.jackson2)
+    implementation(libs.google.auth.library.oauth2.http)
+    implementation(libs.slf4j.api)
 
     // override any guava:*-android dependency with jre dependency
-    implementation group: 'com.google.guava', name: 'guava', version:'33.4.6-jre'
+    implementation(libs.guava)
 
     // Exclude stuff that we don't need that bring in a ton of transitive deps.
     configurations.implementation {
@@ -17,5 +17,5 @@ dependencies {
         exclude group: 'com.google.j2objc', module: 'j2objc-annotations'
     }
 
-    testImplementation group: 'junit', name: 'junit', version: '4.13.2'
+    testImplementation(libs.junit)
 }
