@@ -16,6 +16,7 @@ This project contains a set of tools for authenticating with and using Google Ar
 - Follow the existing coding style and conventions.
 - Use the Gradle wrapper (`./gradlew`) for all Gradle commands.
 - Do not commit directly to the `main` branch. All changes should be made through pull requests.
+- You are not allowed to merge changes. All merges must be performed by a human.
 
 ## Development
 
