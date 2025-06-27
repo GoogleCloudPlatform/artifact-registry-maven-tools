@@ -1,11 +1,25 @@
 plugins {
     `java-gradle-plugin`
+    `jvm-test-suite`
+    alias(libs.plugins.kotlin.jvm)
     alias(libs.plugins.gradle.plugin.publish)
 }
 
-java {
-    toolchain {
-        languageVersion.set(JavaLanguageVersion.of(8))
+kotlin { jvmToolchain(21) }
+
+testing {
+    suites {
+        val test by getting (JvmTestSuite::class) {
+            useJUnitJupiter()
+        }
+        register<JvmTestSuite>("functionalTest") {
+            dependencies {
+                implementation(project())
+                implementation(libs.kotest.runner.junit5)
+                implementation(libs.kotest.assertions.core)
+                implementation(gradleTestKit())
+            }
+        }
     }
 }
 
@@ -26,4 +40,5 @@ gradlePlugin {
             implementationClass = "com.google.cloud.artifactregistry.gradle.plugin.ArtifactRegistryGradlePlugin"
         }
     }
+    testSourceSets( sourceSets.named("functionalTest").get())
 }
