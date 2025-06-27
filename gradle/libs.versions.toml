@@ -1,5 +1,5 @@
 [versions]
-google-http-client = "1.46.3"
+google-http-client = "1.47.1"
 google-auth-library-oauth2-http = "1.33.1"
 slf4j = "2.0.17"
 guava = "33.4.6-jre"
