@@ -3,6 +3,12 @@ plugins {
     alias(libs.plugins.gradle.plugin.publish)
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
 dependencies {
 	implementation gradleApi()
 	implementation(libs.google.auth.library.oauth2.http)
