@@ -1,8 +1,8 @@
 [versions]
-google-http-client = "1.46.3"
-google-auth-library-oauth2-http = "1.33.1"
+google-http-client = "1.47.1"
+google-auth-library-oauth2-http = "1.37.1"
 slf4j = "2.0.17"
-guava = "33.4.6-jre"
+guava = "33.4.8-jre"
 junit = "4.13.2"
 maven-wagon = "3.5.3"
 maven-plugin-api = "3.9.10"
