@@ -30,14 +30,14 @@ kotlin {
 dependencies {
     implementation(gradleApi())
     implementation(libs.google.auth.library.oauth2.http)
-    implementation(libs.jackson.core)
+    // implementation(libs.jackson.core)
 }
 
-configurations.all {
-    resolutionStrategy {
-        force(libs.jackson.core)
-    }
-}
+// configurations.all {
+//     resolutionStrategy {
+//         force(libs.jackson.core)
+//     }
+// }
 
 testing {
     suites {
