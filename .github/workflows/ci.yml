@@ -100,4 +100,6 @@ jobs:
           path: build/testMavenRepo
 
       - name: Run compatibility tests
-        run: ./tests/run-compatibility-tests.sh rootProjects/basic_gradle_proj --ci-build-id=jdk${{ matrix.java-version }}
+        run: |
+          export PATH=$GCLOUD_SDK_PATH/bin:$PATH
+          ./tests/run-compatibility-tests.sh rootProjects/basic_gradle_proj --ci-build-id=jdk${{ matrix.java-version }}
