@@ -79,7 +79,7 @@ repositories {
     mavenLocal()
     maven {
         name = "testMavenRepo"
-            url = rootProject.file("tests/project_components/ar-test-maven-repo").toURI()
+        url = rootProject.layout.buildDirectory.dir("testMavenRepo").get().asFile.toURI()
     }
 }
 }

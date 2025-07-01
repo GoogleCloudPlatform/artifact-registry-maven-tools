@@ -1,7 +1,8 @@
 pluginManagement {
+    val testMavenRepoPath: String by settings
     repositories {
         exclusiveContent {
-            forRepository { maven { url = uri("../../ar-test-maven-repo") } }
+            forRepository { maven { url = uri(testMavenRepoPath) } }
             filter { includeGroupByRegex("com[.]google[.]cloud[.]artifactregistry.*") }
         }
         gradlePluginPortal()
@@ -20,4 +21,4 @@ rootProject.name = "basic_gradle_proj"
 
 include("lib")
 
-project(":lib").projectDir = File("../subProjects/lib")
+project(":lib").projectDir = File("../../subProjects/lib")
