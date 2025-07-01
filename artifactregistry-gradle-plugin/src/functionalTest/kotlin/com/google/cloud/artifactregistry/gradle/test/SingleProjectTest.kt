@@ -26,7 +26,7 @@ import java.io.File
 
 private fun getGradleVersions(): List<String> {
     val versions = System.getProperty("tested.gradle.versions")
-    return versions?.split(",")?.filter { it.isNotBlank() && !it.startsWith("#") } ?: emptyList()
+    return versions?.split(",")?.filter { it.isNotBlank()} ?: emptyList()
 }
 
 class SingleProjectTest : StringSpec({
