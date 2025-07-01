@@ -10,6 +10,9 @@ plugins {
 
 java {
     toolchain {
+        // This sets the base JVM version for the project, including the functional tests
+        // TODO: Consider moving to the test suite configuration
+        // Note: Do not increase above Java 21, as Gradle versions 8-8.7 were not compatible with Java 22+
         languageVersion = JavaLanguageVersion.of(17)
     }
 }

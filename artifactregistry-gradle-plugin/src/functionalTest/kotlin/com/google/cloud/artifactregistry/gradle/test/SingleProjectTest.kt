@@ -16,16 +16,18 @@
 
 package com.google.cloud.artifactregistry.gradle.test
 
-private fun getGradleVersions(): List<String> {
-    val versions = System.getProperty("tested.gradle.versions")
-    return versions?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
-}
 import io.kotest.core.spec.style.StringSpec
 import io.kotest.datatest.withData
 import io.kotest.engine.spec.tempdir
 import io.kotest.matchers.string.shouldContain
 import org.gradle.testkit.runner.GradleRunner
 import java.io.File
+
+
+private fun getGradleVersions(): List<String> {
+    val versions = System.getProperty("tested.gradle.versions")
+    return versions?.split(",")?.filter { it.isNotBlank() && !it.startsWith("#") } ?: emptyList()
+}
 
 class SingleProjectTest : StringSpec({
     val pluginId = "com.google.cloud.artifactregistry.gradle-plugin"
@@ -39,6 +41,7 @@ class SingleProjectTest : StringSpec({
         File(testProjectDir, "settings.gradle.kts").writeText("")
         File(testProjectDir, "build.gradle.kts").writeText(
             """
+            repositories { mavenCentral() }
             plugins { id("$pluginId") }
             tasks.register("checkPlugin") {
                 doLast {
@@ -58,6 +61,11 @@ class SingleProjectTest : StringSpec({
         val testProjectDir = tempdir()
         File(testProjectDir, "settings.gradle.kts").writeText(
             """
+            pluginManagement {
+                repositories {
+                    mavenCentral()
+                }
+            }
             plugins {
                 id("$pluginId")
             }
