@@ -1,0 +1,46 @@
+name: "CI"
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java-version: [8, 21, 24]
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: ${{ matrix.java-version }}
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+          cache-write-only: ${{ github.ref == 'refs/heads/master' }}
+
+      - name: Run tests
+        run: ./gradlew test --info
+
+  test-publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 24
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          cache-read-only: ${{ github.ref != 'refs/heads/master' }}
+          cache-write-only: ${{ github.ref == 'refs/heads/master' }}
+
+      - name: Publish to Maven Local
+        run: ./gradlew publishToMavenLocal --info
