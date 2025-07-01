@@ -80,6 +80,7 @@ public final class DefaultCredentialProvider implements CredentialProvider {
       LOGGER.debug("Failed to retrieve Application Default Credentials: " + ex.getMessage());
     }
 
+    /*
     LOGGER.debug("Trying gcloud credentials...");
     try {
       credentials = GcloudCredentials.tryCreateGcloudCredentials(commandExecutor);
@@ -88,6 +89,7 @@ public final class DefaultCredentialProvider implements CredentialProvider {
     } catch (IOException ex) {
       LOGGER.info("Failed to retrieve credentials from gcloud: " + ex.getMessage());
     }
+    */
 
     LOGGER.info("ArtifactRegistry: No credentials could be found.");
     throw new IOException("Failed to find credentials Check debug logs for more details.");

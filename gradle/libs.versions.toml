@@ -1,4 +1,5 @@
 [versions]
+jackson-core = "2.15.2"
 google-http-client = "1.47.1"
 google-auth-library-oauth2-http = "1.37.1"
 slf4j = "2.0.17"
@@ -7,6 +8,8 @@ junit = "4.13.2"
 maven-wagon = "3.5.3"
 maven-plugin-api = "3.9.10"
 gradle-plugin-publish = "1.3.1"
+kotlin = "1.9.23"
+kotest = "5.9.1"
 
 [libraries]
 google-http-client = { group = "com.google.http-client", name = "google-http-client", version.ref = "google-http-client" }
@@ -19,6 +22,11 @@ maven-wagon-http-shared = { group = "org.apache.maven.wagon", name = "wagon-http
 maven-plugin-api = { group = "org.apache.maven", name = "maven-plugin-api", version.ref = "maven-plugin-api" }
 maven-wagon-provider-test = { group = "org.apache.maven.wagon", name = "wagon-provider-test", version.ref = "maven-wagon" }
 maven-wagon-provider-api = { group = "org.apache.maven.wagon", name = "wagon-provider-api", version.ref = "maven-wagon" }
+kotest-runner-junit5 = { group = "io.kotest", name = "kotest-runner-junit5", version.ref = "kotest" }
+kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
+kotest-framework-datatest = { group = "io.kotest", name = "kotest-framework-datatest", version.ref = "kotest" }
+jackson-core = { group = "com.fasterxml.jackson.core", name = "jackson-core", version.ref = "jackson-core" }
 
 [plugins]
 gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }
+kotlin-jvm = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }

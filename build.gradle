@@ -124,6 +124,10 @@ publishing {
     }
     repositories {
         mavenLocal()
+        maven {
+            name = "testMavenRepo"
+            url = rootProject.layout.buildDirectory.dir("testMavenRepo").get().asFile.toURI()
+        }
     }
 }
 

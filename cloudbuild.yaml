@@ -11,19 +11,56 @@
 #     project's Gradle wrapper is used to build and test the code.
 #
 steps:
-# Test against JDK 8
+
+# --- Standard Tests ---
+# These steps run the default 'test' task against different JDKs.
+# They run sequentially to ensure a stable build environment.
+
 - name: "eclipse-temurin:8-jdk"
+  id: "test-jdk8"
   entrypoint: "./gradlew"
   args: ["test", "--info"]
-# Test against JDK 21
+  waitFor: ["-"] # Explicitly start at the beginning
+
 - name: "eclipse-temurin:21-jdk"
+  id: "test-jdk21"
   entrypoint: "./gradlew"
   args: ["test", "--info"]
-# Test against JDK 24
+  waitFor: ["test-jdk8"]
+
 - name: "eclipse-temurin:24-jdk"
+  id: "test-jdk24"
   entrypoint: "./gradlew"
   args: ["test", "--info"]
-# Verify that a full local publish works
+  waitFor: ["test-jdk21"]
+
+
+# Build and publish all artifacts to the local test repository.
+# This step is the foundation for all subsequent test steps.
 - name: "eclipse-temurin:24-jdk"
+  id: "build-and-publish-plugin"
   entrypoint: "./gradlew"
-  args: ["publishToMavenLocal", "--info"]
+  args: ["publishAllPublicationsToTestMavenRepo", "--info"]
+  waitFor: ["test-jdk24"]
+
+# --- Compatibility Tests ---
+# These steps run the compatibility test script for different JDKs.
+# They run in parallel, each with a unique ID to ensure isolated outputs.
+
+- name: "eclipse-temurin:8-jdk"
+  id: "compat-test-jdk8"
+  entrypoint: "./tests/run-compatibility-tests.sh"
+  args: ["rootProjects/basic_gradle_proj", "--ci-build-id=jdk8"]
+  waitFor: ["build-and-publish-plugin"]
+
+- name: "eclipse-temurin:17-jdk"
+  id: "compat-test-jdk17"
+  entrypoint: "./tests/run-compatibility-tests.sh"
+  args: ["rootProjects/basic_gradle_proj", "--ci-build-id=jdk17"]
+  waitFor: ["build-and-publish-plugin"]
+
+- name: "eclipse-temurin:24-jdk"
+  id: "compat-test-jdk24"
+  entrypoint: "./tests/run-compatibility-tests.sh"
+  args: ["rootProjects/basic_gradle_proj", "--ci-build-id=jdk24"]
+  waitFor: ["build-and-publish-plugin"]
