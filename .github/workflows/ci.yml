@@ -107,4 +107,4 @@ jobs:
       - name: Run compatibility tests
         run: |
           cd tests/project_components/rootProjects/basic_gradle_proj
-          gradle build --no-daemon -PtestMavenRepoPath=${{ github.workspace }}/build/testMavenRepo
+          gradle build -PtestMavenRepoPath=${{ github.workspace }}/build/testMavenRepo
