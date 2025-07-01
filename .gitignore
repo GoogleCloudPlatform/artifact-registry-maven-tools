@@ -2,3 +2,4 @@
 .idea/
 build/
 local.properties
+tests/project_components/ar-test-maven-repo

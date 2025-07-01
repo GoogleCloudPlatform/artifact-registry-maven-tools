@@ -23,6 +23,7 @@ maven-wagon-provider-test = { group = "org.apache.maven.wagon", name = "wagon-pr
 maven-wagon-provider-api = { group = "org.apache.maven.wagon", name = "wagon-provider-api", version.ref = "maven-wagon" }
 kotest-runner-junit5 = { group = "io.kotest", name = "kotest-runner-junit5", version.ref = "kotest" }
 kotest-assertions-core = { group = "io.kotest", name = "kotest-assertions-core", version.ref = "kotest" }
+kotest-framework-datatest = { group = "io.kotest", name = "kotest-framework-datatest", version.ref = "kotest" }
 
 [plugins]
 gradle-plugin-publish = { id = "com.gradle.plugin-publish", version.ref = "gradle-plugin-publish" }

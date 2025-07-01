@@ -27,3 +27,18 @@ steps:
 - name: "eclipse-temurin:24-jdk"
   entrypoint: "./gradlew"
   args: ["publishToMavenLocal", "--info"]
+
+# Run gradle version compatibility tests
+
+# Test against JDK 8
+- name: "eclipse-temurin:8-jdk"
+  entrypoint: "./tests/run-gradle-version-tests.sh"
+  args: ["rootProjects/basic_gradle_proj"]
+# Test against JDK 17
+- name: "eclipse-temurin:17-jdk"
+  entrypoint: "./tests/run-gradle-version-tests.sh"
+  args: ["rootProjects/basic_gradle_proj"]
+# Test against JDK 24
+- name: "eclipse-temurin:24-jdk"
+  entrypoint: "./tests/run-gradle-version-tests.sh"
+  args: ["rootProjects/basic_gradle_proj"]
